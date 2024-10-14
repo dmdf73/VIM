@@ -1,0 +1,73 @@
+
+imap <nowait> jj <Esc> 
+imap <nowait> JJ <Esc>
+nnoremap , :
+set background=dark
+set nu
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+nnoremap <Tab> >>
+nnoremap <S-Tab> 
+let mapleader=" "
+nnoremap <leader>u <C-u>zz
+nnoremap <leader>d <C-d>zz
+nnoremap 0 _
+nnoremap _ 0
+set ignorecase
+set smartcase
+set rnu
+nnoremap <BS> x
+
+function! SelectLineAndMoveToEnd()
+    normal! V$
+endfunction
+
+function! TG()
+    if exists("g:keys_flipped") && g:keys_flipped
+        " Revert the key bindings to their original state
+        let g:keys_flipped = 0
+        echo "Key mappings reverted."
+    else
+        " Switch key bindings
+        map <SPACE> ""
+        map sprint :call TG()
+        map S "" 
+        nnoremap ZZ zz
+        vnoremap ZZ zz
+        map W w
+        map B b 
+        map search /
+        map safe :wq <CR> 
+        map save :wq <CR> 
+        nnoremap U u 
+        nnoremap Z u
+        nnoremap H h
+        vnoremap H h
+        nnoremap L l
+        vnoremap L l
+        map X x 
+        nnoremap D d
+        nnoremap DD dd
+        vnoremap D d
+        nnoremap V v
+        vnoremap V v
+        nnoremap YY yy
+        vnoremap Y y
+        map I i
+        " New key bindings
+        nnoremap N :call SelectLineAndMoveToEnd()<CR>
+        vnoremap N $
+        nnoremap M 0
+        vnoremap M 0
+        nnoremap J j
+        vnoremap J j
+        nnoremap K k
+        vnoremap K k
+        let g:keys_flipped = 1
+        echo "Key mappings switched."
+    endif
+endfunction
+
+" Remove spaces in insert mode
+inoremap <Space> <Nop>
+:call TG() 
