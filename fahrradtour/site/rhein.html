@@ -1,6 +1,11 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rheintour ab Darmstadt</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: Kopf mit Eckdaten, darunter Karte + Etappenliste nebeneinander (mobil gestapelt), dann Höhenprofil und Praktisches. */
@@ -122,8 +127,11 @@ svg text { font-family: var(--f-body); }
 .show-opt .opt-path { display: inline; }
 @media (prefers-reduced-motion: reduce) { .marker circle { transition: none; } }
 </style>
+</head>
+<body>
 
 <div class="wrap" id="app">
+  <nav id="siteNav"></nav>
   <header>
     <div class="eyebrow">Radtour · Hessisches Ried · Rhein · Main</div>
     <h1>Von Darmstadt an den Rhein</h1>
@@ -438,3 +446,7 @@ svg text { font-family: var(--f-body); }
   render();
 })();
 </script>
+<script src="touren.js"></script>
+<script>Touren.nav("rhein");</script>
+</body>
+</html>

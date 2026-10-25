@@ -1,0 +1,34 @@
+<title>Radtouren ab Darmstadt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="wrap" id="app">
+  <nav id="siteNav"></nav>
+  <header>
+    <div class="eyebrow">Sieben Touren · Start Darmstadt</div>
+    <h1>Radtouren ab Darmstadt</h1>
+    <p>An den Rhein, nach Frankfurt, an die Bergstraße, hoch zur Burg Frankenstein, zur Grube Messel, zum Kloster Lorsch und eine Feierabendrunde durch die Parks. Jede Tour hat eine eigene Seite mit Karte, Etappen, Höhenprofil, Kalorien und Navi-Links.</p>
+  </header>
+
+  <section class="main">
+    <div class="map-box">
+      <svg id="ov" role="img" aria-label="Übersichtskarte mit sieben Radtouren rund um Darmstadt"></svg>
+      <p class="note">Schematische Karte. Fahr mit der Maus über eine Zeile der Tabelle, um die Tour hervorzuheben; ein Klick öffnet die Tourseite.</p>
+    </div>
+    <div class="card">
+      <h2>Vergleich</h2>
+      <div class="tbl"><table class="cmp" id="cmp">
+        <thead><tr><th>Tour</th><th>km</th><th>Hm ↑</th><th>Zeit</th><th>kcal · 85 kg</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <p class="note" id="kcalNote"></p>
+    </div>
+  </section>
+
+  <section class="tgrid" id="cards" aria-label="Alle Touren"></section>
+</div>
+
+<script src="touren.js"></script>
+<script>Touren.overview();</script>
