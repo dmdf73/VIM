@@ -99,6 +99,12 @@ label.toggle input { accent-color: var(--route); width: 18px; height: 18px; }
 .nav-what { display: flex; flex-direction: column; min-width: 0; }
 .nav-what b { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; }
 .nav-what span { color: var(--muted); font-size: .9rem; }
+.dest { display: flex; flex-wrap: wrap; gap: 8px; }
+.dest label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid var(--line); border-radius: 4px; cursor: pointer; font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; background: var(--surface); }
+.dest input { accent-color: var(--route); width: 16px; height: 16px; margin: 0; }
+.dest label:has(input:checked) { border-color: var(--route); color: var(--route); }
+.dest label:has(input:focus-visible) { outline: 2px solid var(--fg); outline-offset: 2px; }
+.dest small { font-family: var(--f-mono); font-weight: 400; font-size: .85rem; color: var(--muted); }
 .note { font-size: .85rem; color: var(--muted); margin: 0; }
 
 svg text { font-family: var(--f-body); }
@@ -119,45 +125,27 @@ svg text { font-family: var(--f-body); }
 
 <div class="wrap" id="app">
   <header>
-    <div class="eyebrow">Radtour · Hessisches Ried · Rhein</div>
+    <div class="eyebrow">Radtour · Hessisches Ried · Rhein · Main</div>
     <h1>Von Darmstadt an den Rhein</h1>
-    <p>Durchs flache Ried nach Westen bis an den Rhein bei Kornsand, dann auf dem Damm und an den Ufern flussabwärts bis zur Mainmündung und über die Theodor-Heuss-Brücke nach Mainz. Zurück geht es mit der Regionalbahn.</p>
-    <div class="sign" aria-label="Wegweiser: Mainz, etwa 50 Kilometer"><span>Mainz über Kornsand</span><span class="km" id="signKm">49,7 km</span></div>
+    <p id="intro"></p>
+    <div class="dest" role="radiogroup" aria-label="Ziel wählen">
+      <label for="destMz"><input type="radio" name="dest" id="destMz" value="mz" checked> Ziel Mainz <small>≈ 50 km</small></label>
+      <label for="destFf"><input type="radio" name="dest" id="destFf" value="ff"> Ziel Frankfurt <small>≈ 85 km</small></label>
+    </div>
+    <div class="sign" aria-label="Wegweiser"><span id="signTo">Mainz über Kornsand</span><span class="km" id="signKm">49,7 km</span></div>
   </header>
 
   <section class="facts" aria-label="Eckdaten">
     <div class="fact"><small>Strecke</small><b id="fDist">≈ 49,7 km</b></div>
     <div class="fact"><small>Fahrzeit bei 16 km/h</small><b id="fTime">≈ 3:10 h</b></div>
-    <div class="fact"><small>Höhenmeter</small><b>↑ 15 · ↓ 70</b></div>
-    <div class="fact"><small>Davon am Wasser</small><b>≈ 24 km</b></div>
+    <div class="fact"><small>Höhenmeter</small><b id="fHm">↑ 15 · ↓ 70</b></div>
+    <div class="fact"><small>Davon am Wasser</small><b id="fWater">≈ 21 km</b></div>
   </section>
 
   <section class="card nav" aria-labelledby="navH">
     <h2 id="navH">Auf echter Karte öffnen</h2>
-    <div class="nav-row">
-      <div class="nav-what"><b>Ganze Tour</b><span>alle Wegpunkte, Darmstadt bis Mainz</span></div>
-      <div class="links">
-        <a class="btn primary" id="lnkBrouter" href="#" target="_blank" rel="noopener">OpenStreetMap (BRouter)</a>
-        <a class="btn" id="lnkGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
-      </div>
-    </div>
-    <div class="nav-row">
-      <div class="nav-what"><b>Teil 1 · Darmstadt → Kornsand</b><span id="leg1Km">≈ 27 km durchs Ried</span></div>
-      <div class="links">
-        <a class="btn" id="l1Google" href="#" target="_blank" rel="noopener">Google Maps</a>
-        <a class="btn" id="l1Apple" href="#" target="_blank" rel="noopener">Apple Karten</a>
-        <a class="btn" id="l1Osm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
-      </div>
-    </div>
-    <div class="nav-row">
-      <div class="nav-what"><b>Teil 2 · Kornsand → Mainz Hbf</b><span>≈ 24 km am Rhein</span></div>
-      <div class="links">
-        <a class="btn" id="l2Google" href="#" target="_blank" rel="noopener">Google Maps</a>
-        <a class="btn" id="l2Apple" href="#" target="_blank" rel="noopener">Apple Karten</a>
-        <a class="btn" id="l2Osm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
-      </div>
-    </div>
-    <p class="note">Die Links öffnen die Route im Fahrradmodus der jeweiligen Karte. BRouter rechnet auf OpenStreetMap mit allen Wegpunkten und kann die Strecke als GPX exportieren, etwa für Komoot oder ein Radnavi. Google Maps nimmt auf dem Handy nur wenige Zwischenstopps, deshalb gibt es die Tour zusätzlich in zwei Teilen. Apple Karten und openstreetmap.org planen nur von Start zu Ziel, ohne Zwischenpunkte; die Wegführung kann dort leicht abweichen.</p>
+    <div id="navRows"></div>
+    <p class="note">Die Links öffnen die Route im Fahrradmodus der jeweiligen Karte. BRouter rechnet auf OpenStreetMap mit allen Wegpunkten und kann die Strecke als GPX exportieren, etwa für Komoot oder ein Radnavi. Google Maps nimmt auf dem Handy nur wenige Zwischenstopps, deshalb gibt es die Tour zusätzlich in Teilen. Apple Karten und openstreetmap.org planen nur von Start zu Ziel, ohne Zwischenpunkte; die Wegführung kann dort leicht abweichen.</p>
   </section>
 
   <section class="main">
@@ -191,7 +179,8 @@ svg text { font-family: var(--f-body); }
         <li><b>Leeheim → Kornsand:</b> ausgeschilderte Radverbindung (GG 31) abseits der Landstraße bis zum Rheinradweg.</li>
         <li><b>Kornsand → Ginsheim:</b> Damm- und Deichwege des Hessischen Radfernwegs R6 am Rhein.</li>
         <li><b>Mainquerung:</b> über die Mainbrücke Gustavsburg–Kostheim mit Radweg. Die Schleuse liegt fast 2 km flussaufwärts und ist nicht der Weg.</li>
-        <li><b>Theodor-Heuss-Brücke:</b> für Radfahrer freigegeben, viel Betrieb an schönen Tagen.</li>
+        <li><b>Kostheim → Frankfurt (nur Ziel Frankfurt):</b> Mainradweg, ausgeschilderte Etappe Mainz–Frankfurt. Meist asphaltierter Uferweg, bei Eddersheim ein Stück Schotter auf dem Hochwasserdamm.</li>
+        <li><b>Theodor-Heuss-Brücke (nur Ziel Mainz):</b> für Radfahrer freigegeben, viel Betrieb an schönen Tagen.</li>
         <li><b>Kühkopf:</b> Naturschutzgebiet, Beschilderung vor Ort beachten, nicht jeder Weg ist für Räder freigegeben.</li>
       </ul>
     </div>
@@ -201,13 +190,14 @@ svg text { font-family: var(--f-body); }
         <li><b>Fähre Kornsand–Nierstein:</b> nimmt Fahrräder mit, fährt etwa alle 30 Minuten. Bei sehr niedrigem Rheinpegel war sie schon eingestellt, also vorher auf rheinfaehre-nierstein.de prüfen.</li>
         <li><b>Kühkopf-Knoblochsaue:</b> größtes Naturschutzgebiet Hessens, Auwald und Altrhein, Infozentrum im Hofgut Guntershausen. Schöner Abstecher ab Erfelden.</li>
         <li><b>Goddelau:</b> Geburtshaus von Georg Büchner, liegt direkt an der Strecke.</li>
-        <li><b>Ginsheim und Mainspitze:</b> Ufer mit Blick auf Mainz und den Dom, gute Stelle für die letzte Pause.</li>
+        <li><b>Ginsheim und Mainspitze:</b> Ufer mit Blick auf Mainz und den Dom.</li>
+        <li><b>Richtung Frankfurt:</b> Weinberge bei Hochheim, Altstadt von Flörsheim, Höchster Schloss und Mainufer, zum Schluss die Skyline am Eisernen Steg.</li>
       </ul>
     </div>
     <div class="card info">
       <h2>Praktisches</h2>
       <ul>
-        <li><b>Rückfahrt:</b> ab Mainz Hbf fährt die Regionalbahn direkt nach Darmstadt Hbf, etwa 35 bis 40 Minuten. Fahrradmitnahme im RMV ist in der Regel kostenlos, aber vom Platz abhängig.</li>
+        <li id="ret"></li>
         <li><b>Untergrund:</b> überwiegend asphaltierte Wirtschaftswege und Dammwege, einzelne Abschnitte am Rhein wassergebunden. Mit Trekking- oder Citybike gut machbar.</li>
         <li><b>Wind:</b> im offenen Ried oft Westwind, also Gegenwind auf dem ersten Drittel.</li>
         <li><b>Hochwasser:</b> bei hohem Pegel können Uferwege und der Kühkopf gesperrt sein.</li>
@@ -219,164 +209,227 @@ svg text { font-family: var(--f-body); }
 
 <script>
 (function () {
-  // Etappen: [Name, lat, lon, km ab Start, Höhe m, Beschreibung, optional]
+  // Etappen: name, lat, lon, km ab Start, Höhe m, Beschreibung; opt = Kühkopf-Abstecher, dest = nur für dieses Ziel
   const STOPS = [
-    ["Darmstadt Hbf", 49.8725, 8.6295, 0, 145, "Start am Westausgang, raus Richtung Griesheim. Leicht bergab."],
-    ["Griesheim", 49.8635, 8.5615, 6.0, 102, "Durch den Ort, danach Feldwege durchs offene Ried."],
-    ["Wolfskehlen", 49.8555, 8.4985, 11.5, 90, "Riedstadt beginnt. Gemüse- und Spargelfelder, kaum Verkehr."],
-    ["Goddelau", 49.8360, 8.4880, 14.2, 88, "Büchnerhaus am Weg. Bäcker für den ersten Stopp."],
-    ["Erfelden am Altrhein", 49.8345, 8.4615, 16.5, 87, "Erstes Wasser: der Erfelder Altrhein. Hier zweigt der Abstecher zum Kühkopf ab."],
-    ["Hofgut Guntershausen", 49.8220, 8.4120, null, 87, "Infozentrum im Naturschutzgebiet Kühkopf. Hin und zurück nach Erfelden, etwa 9 km.", true],
-    ["Leeheim", 49.8530, 8.4270, 20.4, 87, "Kurz durch den Ort, dann hoch auf den Rheindamm."],
-    ["Kornsand", 49.8770, 8.3640, 26.7, 86, "Am Rhein. Fähre nach Nierstein, Blick auf die Weinberge. Gute Mittagspause."],
-    ["Astheim", 49.9230, 8.3580, 32.9, 87, "Auf Damm und Uferweg flussabwärts, links Auwiesen, rechts der Strom."],
-    ["Ginsheim", 49.9660, 8.3180, 39.6, 86, "Uferpromenade am Altrhein, Biergärten und Eis."],
-    ["Mainspitze", 49.9925, 8.3000, 43.4, 85, "Hier mündet der Main in den Rhein. Blick hinüber auf Mainz."],
-    ["Mainbrücke Kostheim", 49.9985, 8.3110, 44.6, 86, "Über die Mainbrücke (B 43) nach Kostheim, hier kreuzen sich die Radfernwege R3 und R6. Auf der Gustavsburger Seite führt der Radweg unter der Brücke durch, die Auffahrt ist etwas unübersichtlich."],
-    ["Theodor-Heuss-Brücke", 50.0040, 8.2780, 47.7, 88, "Von Kastel über den Rhein in die Mainzer Altstadt."],
-    ["Mainz Hbf", 50.0010, 8.2590, 49.7, 90, "Ziel. Regionalbahn zurück nach Darmstadt."],
+    { name: "Darmstadt Hbf", lat: 49.8725, lon: 8.6295, km: 0, ele: 145, desc: "Start am Westausgang, raus Richtung Griesheim. Leicht bergab." },
+    { name: "Griesheim", lat: 49.8635, lon: 8.5615, km: 6.0, ele: 102, desc: "Durch den Ort, danach Feldwege durchs offene Ried." },
+    { name: "Wolfskehlen", lat: 49.8555, lon: 8.4985, km: 11.5, ele: 90, desc: "Riedstadt beginnt. Gemüse- und Spargelfelder, kaum Verkehr." },
+    { name: "Goddelau", lat: 49.8360, lon: 8.4880, km: 14.2, ele: 88, desc: "Büchnerhaus am Weg. Bäcker für den ersten Stopp." },
+    { name: "Erfelden am Altrhein", lat: 49.8345, lon: 8.4615, km: 16.5, ele: 87, desc: "Erstes Wasser: der Erfelder Altrhein. Hier zweigt der Abstecher zum Kühkopf ab." },
+    { name: "Hofgut Guntershausen", lat: 49.8220, lon: 8.4120, km: null, ele: 87, desc: "Infozentrum im Naturschutzgebiet Kühkopf. Hin und zurück nach Erfelden, etwa 9 km.", opt: true },
+    { name: "Leeheim", lat: 49.8530, lon: 8.4270, km: 20.4, ele: 87, desc: "Kurz durch den Ort, dann hoch auf den Rheindamm." },
+    { name: "Kornsand", lat: 49.8770, lon: 8.3640, km: 26.7, ele: 86, desc: "Am Rhein. Fähre nach Nierstein, Blick auf die Weinberge. Gute Mittagspause." },
+    { name: "Astheim", lat: 49.9230, lon: 8.3580, km: 32.9, ele: 87, desc: "Auf Damm und Uferweg flussabwärts, links Auwiesen, rechts der Strom." },
+    { name: "Ginsheim", lat: 49.9660, lon: 8.3180, km: 39.6, ele: 86, desc: "Uferpromenade am Altrhein, Biergärten und Eis." },
+    { name: "Mainspitze", lat: 49.9925, lon: 8.3000, km: 43.4, ele: 85, desc: "Hier mündet der Main in den Rhein. Blick hinüber auf Mainz." },
+    { name: "Mainbrücke Kostheim", lat: 49.9985, lon: 8.3110, km: 44.6, ele: 86, desc: "Über die Mainbrücke (B 43) nach Kostheim, hier kreuzen sich die Radfernwege R3 und R6. Auf der Gustavsburger Seite führt der Radweg unter der Brücke durch, die Auffahrt ist etwas unübersichtlich." },
+    { name: "Theodor-Heuss-Brücke", lat: 50.0040, lon: 8.2780, km: 47.7, ele: 88, desc: "Von Kastel über den Rhein in die Mainzer Altstadt.", dest: "mz" },
+    { name: "Mainz Hbf", lat: 50.0010, lon: 8.2590, km: 49.7, ele: 90, desc: "Ziel. Regionalbahn zurück nach Darmstadt.", dest: "mz" },
+    { name: "Hochheim", lat: 49.9975, lon: 8.3530, km: 48.2, ele: 87, desc: "Ab hier auf dem Mainradweg flussaufwärts, oben am Hang die Hochheimer Weinberge.", dest: "ff" },
+    { name: "Flörsheim", lat: 50.0110, lon: 8.4300, km: 55.0, ele: 88, desc: "Altstadt direkt am Mainufer, guter Platz für eine Pause.", dest: "ff" },
+    { name: "Eddersheim", lat: 50.0330, lon: 8.4720, km: 59.7, ele: 90, desc: "Staustufe. Ein Stück auf geschottertem Hochwasserdamm.", dest: "ff" },
+    { name: "Okriftel", lat: 50.0640, lon: 8.4880, km: 64.1, ele: 92, desc: "Grüne Uferwiesen, gegenüber Kelsterbach.", dest: "ff" },
+    { name: "Höchst", lat: 50.0985, lon: 8.5440, km: 70.7, ele: 95, desc: "Schloss und Altstadt von Höchst, Mainufer mit Fährstelle.", dest: "ff" },
+    { name: "Frankfurt-Griesheim", lat: 50.0945, lon: 8.6050, km: 75.9, ele: 97, desc: "Weiter auf dem Uferweg Richtung Innenstadt, die Skyline kommt in Sicht.", dest: "ff" },
+    { name: "Eiserner Steg", lat: 50.1080, lon: 8.6830, km: 82.9, ele: 98, desc: "Mitten in Frankfurt, Römerberg und Museumsufer gleich nebenan.", dest: "ff" },
+    { name: "Frankfurt Hbf", lat: 50.1070, lon: 8.6630, km: 84.6, ele: 100, desc: "Ziel. S-Bahn oder Regionalzug zurück nach Darmstadt.", dest: "ff" },
   ];
-  // Linienführung (lat, lon) inkl. Dammpunkt zwischen Leeheim und Kornsand
-  const ROUTE = [
+  // Linienführung (lat, lon)
+  const ROUTE_COMMON = [
     [49.8725,8.6295],[49.8690,8.6000],[49.8635,8.5615],[49.8600,8.5300],[49.8555,8.4985],[49.8360,8.4880],
     [49.8345,8.4615],[49.8440,8.4440],[49.8530,8.4270],[49.8650,8.3900],[49.8770,8.3640],[49.9000,8.3600],
-    [49.9230,8.3580],[49.9450,8.3420],[49.9660,8.3180],[49.9800,8.3090],[49.9925,8.3000],[49.9960,8.3090],
-    [49.9985,8.3110],[50.0040,8.3000],[50.0060,8.2840],[50.0040,8.2780],[50.0010,8.2590]
+    [49.9230,8.3580],[49.9450,8.3420],[49.9660,8.3180],[49.9800,8.3090],[49.9925,8.3000],[49.9960,8.3090],[49.9985,8.3110]
   ];
+  const ROUTE_END = {
+    mz: [[50.0040,8.3000],[50.0060,8.2840],[50.0040,8.2780],[50.0010,8.2590]],
+    ff: [[50.0010,8.3300],[49.9975,8.3530],[50.0000,8.3950],[50.0110,8.4300],[50.0330,8.4720],[50.0640,8.4880],
+         [50.0700,8.5150],[50.0985,8.5440],[50.0945,8.6050],[50.0985,8.6450],[50.1010,8.6620],[50.1080,8.6830],[50.1070,8.6630]],
+  };
   const OPT = [[49.8345,8.4615],[49.8300,8.4400],[49.8220,8.4120]];
   const RHINE = [[49.765,8.470],[49.785,8.430],[49.800,8.385],[49.830,8.366],[49.856,8.362],[49.877,8.356],
-    [49.900,8.352],[49.925,8.345],[49.950,8.325],[49.970,8.305],[49.985,8.293],[49.995,8.287],[50.004,8.275],[50.020,8.258],[50.035,8.245]];
+    [49.900,8.352],[49.925,8.345],[49.950,8.325],[49.970,8.305],[49.985,8.293],[49.995,8.287],[50.004,8.275],[50.020,8.258],[50.035,8.245],[50.045,8.215]];
   const ALTRHEIN = [[49.790,8.410],[49.800,8.448],[49.815,8.466],[49.834,8.466],[49.848,8.445],[49.858,8.405],[49.862,8.372]];
-  const MAIN = [[49.995,8.290],[49.997,8.310],[50.001,8.330],[50.000,8.360],[49.995,8.395],[49.998,8.430],[50.008,8.470]];
+  const MAIN = [[49.995,8.290],[49.997,8.310],[50.001,8.330],[49.996,8.353],[49.999,8.395],[50.009,8.430],[50.031,8.474],
+    [50.062,8.491],[50.068,8.515],[50.096,8.543],[50.093,8.605],[50.098,8.645],[50.101,8.662],[50.107,8.683],[50.105,8.740]];
   const TOWNS = [["Nierstein",49.870,8.338,"end"],["Oppenheim",49.855,8.357,"end"],["Nackenheim",49.915,8.338,"end"],
     ["Stockstadt",49.810,8.473,"start"],["Trebur",49.926,8.407,"start"],["Groß-Gerau",49.921,8.482,"start"],
-    ["Rüsselsheim",49.990,8.413,"start"],["Pfungstadt",49.805,8.603,"start"],["Weiterstadt",49.904,8.588,"start"]];
+    ["Rüsselsheim",49.985,8.413,"start"],["Pfungstadt",49.805,8.603,"start"],["Weiterstadt",49.904,8.588,"start"],
+    ["Mörfelden",49.978,8.567,"start"],["Kelsterbach",50.058,8.530,"start"],["Wiesbaden",50.080,8.240,"start", "ff"],["Mainz",49.993,8.262,"end", "ff"]];
+  const DEST = {
+    mz: { label: "Mainz über Kornsand", end: 49.7, hm: "↑ 15 · ↓ 70", water: 21,
+      intro: "Durchs flache Ried nach Westen bis an den Rhein bei Kornsand, dann auf dem Damm und an den Ufern flussabwärts bis zur Mainmündung und über die Theodor-Heuss-Brücke nach Mainz. Zurück geht es mit der Regionalbahn.",
+      ret: "<b>Rückfahrt:</b> ab Mainz Hbf fährt die Regionalbahn direkt nach Darmstadt Hbf, etwa 35 bis 40 Minuten. Fahrradmitnahme im RMV ist in der Regel kostenlos, aber vom Platz abhängig.",
+      lat1: 50.045, lon1: 8.700,
+      legs: [["Teil 2 · Kornsand → Mainz Hbf", "≈ 23 km am Rhein", ["Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim", "Mainz Hbf"]]] },
+    ff: { label: "Frankfurt über Kornsand", end: 84.6, hm: "↑ 30 · ↓ 75", water: 54,
+      intro: "Durchs flache Ried an den Rhein bei Kornsand, am Rhein entlang bis zur Mainmündung und von dort auf dem Mainradweg flussaufwärts über Hochheim, Flörsheim und Höchst bis nach Frankfurt. Zurück geht es mit der S-Bahn oder dem Regionalzug.",
+      ret: "<b>Rückfahrt:</b> ab Frankfurt Hbf fahren Regionalzüge und S-Bahnen häufig nach Darmstadt Hbf, je nach Zug etwa 15 bis 35 Minuten. Fahrradmitnahme im RMV ist in der Regel kostenlos, aber vom Platz abhängig; in der Rushhour wird es eng.",
+      lat1: 50.150, lon1: 8.740,
+      legs: [["Teil 2 · Kornsand → Mainspitze", "≈ 18 km am Rhein", ["Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim"]],
+             ["Teil 3 · Kostheim → Frankfurt Hbf", "≈ 40 km auf dem Mainradweg", ["Mainbrücke Kostheim", "Flörsheim", "Eddersheim", "Höchst", "Frankfurt Hbf"]]] },
+  };
 
-  // Projektion: einfache Plattkarte mit Breitenkorrektur
-  const W = 640, H = 480, lon0 = 8.200, lon1 = 8.700, lat0 = 49.775, lat1 = 50.040;
-  const kx = W / (lon1 - lon0), ky = H / (lat1 - lat0);
-  const px = (p) => [((p[1] - lon0) * kx).toFixed(1), ((lat1 - p[0]) * ky).toFixed(1)];
-  const path = (pts) => "M" + pts.map((p) => px(p).join(",")).join(" L");
   const NS = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
-
-  const map = document.getElementById("map");
-  map.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  el("rect", { x: 0, y: 0, width: W, height: H, rx: 4, fill: "var(--land)" }, map);
-  el("text", { x: 24, y: 420, class: "m-region" }, map).textContent = "Rheinhessen";
-  el("text", { x: 470, y: 330, class: "m-region" }, map).textContent = "Hess. Ried";
-  // Kühkopf-Fläche
-  el("path", { d: path(ALTRHEIN.concat([[49.830,8.366],[49.800,8.385]])) + "Z", fill: "var(--water-soft)", opacity: 0.35 }, map);
-  el("text", { x: px([49.828,8.418])[0], y: px([49.828,8.418])[1], class: "m-label", "text-anchor": "middle", "font-style": "italic" }, map).textContent = "Kühkopf";
-  el("path", { d: path(MAIN), fill: "none", stroke: "var(--water)", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
-  el("path", { d: path(ALTRHEIN), fill: "none", stroke: "var(--water)", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
-  el("path", { d: path(RHINE), fill: "none", stroke: "var(--water)", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
-  const rl = px([49.900,8.372]); el("text", { x: rl[0], y: rl[1], class: "m-water", transform: `rotate(-80 ${rl[0]} ${rl[1]})`, "text-anchor": "middle" }, map).textContent = "RHEIN";
-  const ml = px([50.006,8.375]); el("text", { x: ml[0], y: ml[1], class: "m-water", "text-anchor": "middle" }, map).textContent = "MAIN";
-
-  TOWNS.forEach(([n, la, lo, anchor]) => {
-    const [x, y] = px([la, lo]);
-    el("circle", { cx: x, cy: y, r: 2.5, fill: "var(--town)" }, map);
-    el("text", { x: +x + (anchor === "end" ? -6 : 6), y: +y + 4, class: "m-label", "text-anchor": anchor }, map).textContent = n;
-  });
-
-  el("path", { d: path(OPT), class: "opt-path", fill: "none", stroke: "var(--route)", "stroke-width": 3.5, "stroke-dasharray": "6 5", "stroke-linecap": "round" }, map);
-  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--surface)", "stroke-width": 8, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.8 }, map);
-  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--route)", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
-
-  // Maßstab 5 km und Nordpfeil
-  const kmPx = kx / (111.32 * Math.cos(49.9 * Math.PI / 180));
-  const sx = W - 30 - 5 * kmPx, sy = H - 24;
-  el("path", { d: `M${sx},${sy} h${5 * kmPx}`, stroke: "var(--fg)", "stroke-width": 2 }, map);
-  el("path", { d: `M${sx},${sy - 4} v8 M${sx + 5 * kmPx},${sy - 4} v8`, stroke: "var(--fg)", "stroke-width": 1.5 }, map);
-  el("text", { x: sx + 2.5 * kmPx, y: sy - 8, class: "m-label", "text-anchor": "middle" }, map).textContent = "5 km";
-  el("path", { d: `M${W - 30},26 l-7,16 l7,-4 l7,4 z`, fill: "var(--fg)" }, map);
-  el("text", { x: W - 30, y: 56, class: "m-label", "text-anchor": "middle" }, map).textContent = "N";
-
-  // Marker + Liste
-  const list = document.getElementById("stops");
-  const markers = [];
-  let num = 0;
-  STOPS.forEach((s, i) => {
-    const [name, la, lo, km, , desc, opt] = s;
-    const label = opt ? "K" : String(++num);
-    const [x, y] = px([la, lo]);
-    const g = el("g", { class: "marker" + (opt ? " option" : ""), tabindex: -1 }, map);
-    el("circle", { cx: x, cy: y, r: 10 }, g);
-    el("text", { x, y }, g).textContent = label;
-    const t = el("title", {}, g); t.textContent = name;
-    if (i === 0 || i === STOPS.length - 1 || name === "Kornsand") {
-      const below = name !== "Kornsand";
-      el("text", { x: below ? x : +x - 14, y: below ? +y + 26 : +y + 4, "text-anchor": below ? "middle" : "end", fill: "var(--fg)", "font-weight": 600, "font-size": 12 }, map).textContent = name;
-    }
-    const li = document.createElement("li");
-    li.className = "stop" + (opt ? " option" : "");
-    li.tabIndex = 0;
-    li.innerHTML = `<span class="n">${label}</span><h3></h3><span class="km">${km == null ? "+9 km" : km.toFixed(1).replace(".", ",") + " km"}</span><p></p>`;
-    li.querySelector("h3").textContent = name;
-    li.querySelector("p").textContent = desc;
-    list.appendChild(li);
-    markers.push({ g, li });
-    const activate = () => markers.forEach((m) => { const on = m.g === g; m.g.classList.toggle("active", on); m.li.classList.toggle("active", on); });
-    li.addEventListener("click", activate);
-    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
-    g.addEventListener("click", () => { activate(); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); });
-  });
-
-  // Höhenprofil
-  const prof = document.getElementById("profile");
-  const PW = 720, PH = 180, L = 40, R = 12, T = 12, B = 30, maxKm = 51, eMin = 80, eMax = 150;
-  prof.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
-  const xk = (k) => L + (k / maxKm) * (PW - L - R), ye = (e) => T + (1 - (e - eMin) / (eMax - eMin)) * (PH - T - B);
-  [80, 100, 120, 140].forEach((e) => {
-    el("line", { x1: L, x2: PW - R, y1: ye(e), y2: ye(e), stroke: "var(--line)", "stroke-width": 1 }, prof);
-    el("text", { x: L - 6, y: ye(e) + 4, class: "m-label", "text-anchor": "end" }, prof).textContent = e + " m";
-  });
-  [0, 10, 20, 30, 40, 50].forEach((k) => {
-    el("text", { x: xk(k), y: PH - 10, class: "m-label", "text-anchor": "middle" }, prof).textContent = k + " km";
-  });
-  const pts = STOPS.filter((s) => !s[6]).map((s) => [xk(s[3]), ye(s[4])]);
-  const line = "M" + pts.map((p) => p.join(",")).join(" L");
-  el("path", { d: line + ` L${xk(49.7)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
-  el("path", { d: line, fill: "none", stroke: "var(--route)", "stroke-width": 2.5, "stroke-linejoin": "round" }, prof);
-  const water = xk(26.7);
-  el("line", { x1: water, x2: water, y1: T, y2: ye(eMin), stroke: "var(--water)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }, prof);
-  el("text", { x: water + 6, y: T + 12, class: "m-label", fill: "var(--water)" }, prof).textContent = "ab hier am Rhein";
-  pts.forEach((p, i) => el("circle", { cx: p[0], cy: p[1], r: i === 0 || i === pts.length - 1 ? 4 : 2.5, fill: "var(--route)" }, prof));
-
-  // Option umschalten
-  const app = document.getElementById("app");
-  const tgl = document.getElementById("optToggle");
   const fmt = (n) => n.toFixed(1).replace(".", ",");
-  const update = () => {
+  const byName = (n) => STOPS.find((s) => s.name === n);
+  const ll = (s) => s.lat + "," + s.lon;
+  const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
+  const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
+  const osm = (a, b) => "https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=" + encodeURIComponent(ll(a) + ";" + ll(b));
+  const brouter = (pts) => "https://brouter.de/brouter-web/#map=10/49.98/8.45/standard&lonlats=" + pts.map((s) => s.lon + "," + s.lat).join(";") + "&profile=trekking";
+
+  const app = document.getElementById("app");
+  const map = document.getElementById("map");
+  const prof = document.getElementById("profile");
+  const list = document.getElementById("stops");
+  const tgl = document.getElementById("optToggle");
+
+  function drawMap(dest, stops) {
+    map.replaceChildren();
+    // Projektion: einfache Plattkarte, Breitengrade gestreckt
+    const lon0 = 8.200, lat0 = 49.775, { lat1, lon1 } = DEST[dest];
+    const W = 640, kx = W / (lon1 - lon0), ky = kx / Math.cos(50 * Math.PI / 180) * 0.92, H = Math.round((lat1 - lat0) * ky);
+    const px = (p) => [((p[1] - lon0) * kx).toFixed(1), ((lat1 - p[0]) * ky).toFixed(1)];
+    const path = (pts) => "M" + pts.map((p) => px(p).join(",")).join(" L");
+    map.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    el("rect", { x: 0, y: 0, width: W, height: H, rx: 4, fill: "var(--land)" }, map);
+    const lbl = (p, t, cls, extra) => { const [x, y] = px(p); return el("text", Object.assign({ x, y, class: cls }, extra || {}), map).textContent = t; };
+    lbl([49.800, 8.215], "Rheinhessen", "m-region");
+    lbl([49.885, 8.520], "Hess. Ried", "m-region");
+    el("path", { d: path(ALTRHEIN.concat([[49.830,8.366],[49.800,8.385]])) + "Z", fill: "var(--water-soft)", opacity: 0.35 }, map);
+    lbl([49.828, 8.418], "Kühkopf", "m-label", { "text-anchor": "middle", "font-style": "italic" });
+    const water = (pts, w) => el("path", { d: path(pts), fill: "none", stroke: "var(--water)", "stroke-width": w, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+    water(MAIN, 5); water(ALTRHEIN, 3); water(RHINE, 9);
+    const rl = px([49.900, 8.372]);
+    el("text", { x: rl[0], y: rl[1], class: "m-water", transform: `rotate(-80 ${rl[0]} ${rl[1]})`, "text-anchor": "middle" }, map).textContent = "RHEIN";
+    lbl(dest === "ff" ? [50.060, 8.455] : [50.012, 8.375], "MAIN", "m-water", { "text-anchor": "middle" });
+    TOWNS.filter((t) => !t[4] || t[4] === dest).forEach(([n, la, lo, anchor]) => {
+      if (la > lat1 - 0.005 || lo > lon1) return;
+      const [x, y] = px([la, lo]);
+      el("circle", { cx: x, cy: y, r: 2.5, fill: "var(--town)" }, map);
+      el("text", { x: +x + (anchor === "end" ? -6 : 6), y: +y + 4, class: "m-label", "text-anchor": anchor }, map).textContent = n;
+    });
+    const route = ROUTE_COMMON.concat(ROUTE_END[dest]);
+    el("path", { d: path(OPT), class: "opt-path", fill: "none", stroke: "var(--route)", "stroke-width": 3.5, "stroke-dasharray": "6 5", "stroke-linecap": "round" }, map);
+    el("path", { d: path(route), fill: "none", stroke: "var(--surface)", "stroke-width": 8, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.8 }, map);
+    el("path", { d: path(route), fill: "none", stroke: "var(--route)", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+    // Maßstab 5 km und Nordpfeil
+    const kmPx = kx / (111.32 * Math.cos(49.9 * Math.PI / 180));
+    const sx = W - 30 - 5 * kmPx, sy = H - 24;
+    el("path", { d: `M${sx},${sy} h${5 * kmPx}`, stroke: "var(--fg)", "stroke-width": 2 }, map);
+    el("path", { d: `M${sx},${sy - 4} v8 M${sx + 5 * kmPx},${sy - 4} v8`, stroke: "var(--fg)", "stroke-width": 1.5 }, map);
+    el("text", { x: sx + 2.5 * kmPx, y: sy - 8, class: "m-label", "text-anchor": "middle" }, map).textContent = "5 km";
+    el("path", { d: `M${W - 30},${H - 86} l-7,16 l7,-4 l7,4 z`, fill: "var(--fg)" }, map);
+    el("text", { x: W - 30, y: H - 56, class: "m-label", "text-anchor": "middle" }, map).textContent = "N";
+    return px;
+  }
+
+  function drawStops(stops, px) {
+    list.replaceChildren();
+    const markers = [];
+    let num = 0;
+    stops.forEach((s, i) => {
+      const label = s.opt ? "K" : String(++num);
+      const [x, y] = px([s.lat, s.lon]);
+      const g = el("g", { class: "marker" + (s.opt ? " option" : "") }, map);
+      el("circle", { cx: x, cy: y, r: 10 }, g);
+      el("text", { x, y }, g).textContent = label;
+      el("title", {}, g).textContent = s.name;
+      if (i === 0 || i === stops.length - 1 || s.name === "Kornsand") {
+        const below = s.name !== "Kornsand";
+        el("text", { x: below ? x : +x - 14, y: below ? +y + 26 : +y + 4, "text-anchor": below ? "middle" : "end", fill: "var(--fg)", "font-weight": 600, "font-size": 12 }, map).textContent = s.name;
+      }
+      const li = document.createElement("li");
+      li.className = "stop" + (s.opt ? " option" : "");
+      li.tabIndex = 0;
+      li.innerHTML = `<span class="n">${label}</span><h3></h3><span class="km">${s.km == null ? "+9 km" : fmt(s.km) + " km"}</span><p></p>`;
+      li.querySelector("h3").textContent = s.name;
+      li.querySelector("p").textContent = s.desc;
+      list.appendChild(li);
+      markers.push({ g, li });
+      const activate = () => markers.forEach((m) => { const on = m.g === g; m.g.classList.toggle("active", on); m.li.classList.toggle("active", on); });
+      li.addEventListener("click", activate);
+      li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+      g.addEventListener("click", () => { activate(); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); });
+    });
+  }
+
+  function drawProfile(dest, stops) {
+    prof.replaceChildren();
+    const end = DEST[dest].end;
+    const PW = 720, PH = 180, L = 40, R = 12, T = 12, B = 30, maxKm = Math.ceil(end / 10) * 10 + 1, eMin = 80, eMax = 150;
+    prof.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+    const xk = (k) => L + (k / maxKm) * (PW - L - R), ye = (e) => T + (1 - (e - eMin) / (eMax - eMin)) * (PH - T - B);
+    [80, 100, 120, 140].forEach((e) => {
+      el("line", { x1: L, x2: PW - R, y1: ye(e), y2: ye(e), stroke: "var(--line)", "stroke-width": 1 }, prof);
+      el("text", { x: L - 6, y: ye(e) + 4, class: "m-label", "text-anchor": "end" }, prof).textContent = e + " m";
+    });
+    for (let k = 0; k <= maxKm; k += 10) el("text", { x: xk(k), y: PH - 10, class: "m-label", "text-anchor": "middle" }, prof).textContent = k + " km";
+    const pts = stops.filter((s) => !s.opt).map((s) => [xk(s.km), ye(s.ele)]);
+    const line = "M" + pts.map((p) => p.join(",")).join(" L");
+    el("path", { d: line + ` L${xk(end)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
+    el("path", { d: line, fill: "none", stroke: "var(--route)", "stroke-width": 2.5, "stroke-linejoin": "round" }, prof);
+    const mark = (km, text) => {
+      el("line", { x1: xk(km), x2: xk(km), y1: T, y2: ye(eMin), stroke: "var(--water)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }, prof);
+      el("text", { x: xk(km) + 6, y: T + 12, class: "m-label", fill: "var(--water)" }, prof).textContent = text;
+    };
+    mark(26.7, "ab hier am Rhein");
+    if (dest === "ff") mark(44.6, "ab hier am Main");
+    pts.forEach((p, i) => el("circle", { cx: p[0], cy: p[1], r: i === 0 || i === pts.length - 1 ? 4 : 2.5, fill: "var(--route)" }, prof));
+  }
+
+  function drawNav(dest, on, seq) {
+    const rows = document.getElementById("navRows");
+    rows.replaceChildren();
+    const btn = (text, href, primary) => `<a class="btn${primary ? " primary" : ""}" href="${href}" target="_blank" rel="noopener">${text}</a>`;
+    const row = (title, sub, links) => {
+      const d = document.createElement("div");
+      d.className = "nav-row";
+      d.innerHTML = `<div class="nav-what"><b></b><span></span></div><div class="links">${links}</div>`;
+      d.querySelector("b").textContent = title;
+      d.querySelector("span").textContent = sub;
+      rows.appendChild(d);
+    };
+    const endName = seq[seq.length - 1].name;
+    const keep = ["Goddelau", "Hofgut Guntershausen", "Leeheim", "Kornsand", "Ginsheim", "Mainbrücke Kostheim", "Theodor-Heuss-Brücke", "Flörsheim", "Eddersheim", "Höchst"];
+    const full = seq.filter((s, i) => i === 0 || i === seq.length - 1 || keep.includes(s.name)).slice(0, 11);
+    row("Ganze Tour", "alle Wegpunkte, Darmstadt bis " + endName.replace(" Hbf", ""), btn("OpenStreetMap (BRouter)", brouter(seq), true) + btn("Google Maps", google(full)));
+    const legs = [["Teil 1 · Darmstadt → Kornsand", on ? "≈ 36 km durchs Ried, mit Kühkopf" : "≈ 27 km durchs Ried",
+      ["Darmstadt Hbf", "Griesheim", on ? "Hofgut Guntershausen" : "Goddelau", "Leeheim", "Kornsand"]]].concat(DEST[dest].legs);
+    legs.forEach(([title, sub, names]) => {
+      const pts = names.map(byName), a = pts[0], b = pts[pts.length - 1];
+      row(title, sub, btn("Google Maps", google(pts)) + btn("Apple Karten", apple(a, b)) + btn("OpenStreetMap", osm(a, b)));
+    });
+  }
+
+  function render() {
+    const dest = document.querySelector('input[name="dest"]:checked').value;
     const on = tgl.checked;
+    const D = DEST[dest];
     app.classList.toggle("show-opt", on);
-    const d = 49.7 + (on ? 9 : 0);
+    const stops = STOPS.filter((s) => !s.dest || s.dest === dest);
+    const px = drawMap(dest, stops);
+    drawStops(stops, px);
+    drawProfile(dest, stops);
+    const d = D.end + (on ? 9 : 0);
     const mins = Math.round((d / 16) * 60);
-    document.getElementById("fDist").textContent = "≈ " + fmt(d) + " km";
+    document.getElementById("intro").textContent = D.intro;
+    document.getElementById("signTo").textContent = D.label;
     document.getElementById("signKm").textContent = fmt(d) + " km";
+    document.getElementById("fDist").textContent = "≈ " + fmt(d) + " km";
     document.getElementById("fTime").textContent = "≈ " + Math.floor(mins / 60) + ":" + String(mins % 60).padStart(2, "0") + " h";
-    const wps = STOPS.filter((s) => on || !s[6]);
-    const seq = on ? (() => { const a = wps.slice(); const i = a.findIndex((s) => s[6]); a.splice(i + 1, 0, a[i - 1]); return a; })() : wps;
-    document.getElementById("lnkBrouter").href = "https://brouter.de/brouter-web/#map=11/49.93/8.44/standard&lonlats=" + seq.map((s) => s[2] + "," + s[1]).join(";") + "&profile=trekking";
-    const byName = (n) => STOPS.find((s) => s[0] === n);
-    const ll = (s) => s[1] + "," + s[2];
-    const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
-    const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
-    const osm = (a, b) => "https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=" + encodeURIComponent(ll(a) + ";" + ll(b));
-    const full = seq.filter((s, i) => i === 0 || i === seq.length - 1 || ["Goddelau", "Leeheim", "Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim", "Theodor-Heuss-Brücke", "Hofgut Guntershausen"].includes(s[0]));
-    document.getElementById("lnkGoogle").href = google(full);
-    const leg1 = ["Darmstadt Hbf", "Griesheim", on ? "Hofgut Guntershausen" : "Goddelau", "Leeheim", "Kornsand"].map(byName);
-    const leg2 = ["Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim", "Mainz Hbf"].map(byName);
-    document.getElementById("l1Google").href = google(leg1);
-    document.getElementById("l2Google").href = google(leg2);
-    document.getElementById("l1Apple").href = apple(leg1[0], leg1[4]);
-    document.getElementById("l2Apple").href = apple(leg2[0], leg2[4]);
-    document.getElementById("l1Osm").href = osm(leg1[0], leg1[4]);
-    document.getElementById("l2Osm").href = osm(leg2[0], leg2[4]);
-    document.getElementById("leg1Km").textContent = on ? "≈ 36 km durchs Ried, mit Kühkopf" : "≈ 27 km durchs Ried";
-  };
-  tgl.addEventListener("change", update);
-  update();
+    document.getElementById("fHm").textContent = D.hm;
+    document.getElementById("fWater").textContent = "≈ " + D.water + " km";
+    document.getElementById("ret").innerHTML = D.ret;
+    // Reihenfolge für Routenlinks: Kühkopf als Hin und Zurück ab Erfelden
+    const wps = stops.filter((s) => on || !s.opt);
+    const seq = on ? (() => { const a = wps.slice(); const i = a.findIndex((s) => s.opt); a.splice(i + 1, 0, a[i - 1]); return a; })() : wps;
+    drawNav(dest, on, seq);
+  }
+
+  tgl.addEventListener("change", render);
+  document.querySelectorAll('input[name="dest"]').forEach((r) => r.addEventListener("change", render));
+  render();
 })();
 </script>
