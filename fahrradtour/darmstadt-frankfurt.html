@@ -1,0 +1,325 @@
+<title>Radtour Darmstadt–Frankfurt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopf mit Eckdaten und Navi-Links, darunter Karte + Etappenliste nebeneinander (mobil gestapelt), dann Höhenprofil und Praktisches. */
+:root {
+  --bg: #f3f5f1;          /* Ried-Wiesen, leicht grünstichig */
+  --surface: #ffffff;
+  --fg: #1d2622;
+  --muted: #5c6a63;
+  --line: #d5ddd7;
+  --land: #e7ece4;
+  --water: #5f9fc0;
+  --water-soft: #b9d6e5;
+  --route: #c8202f;       /* Rot wie auf den Radwegweisern */
+  --route-soft: #c8202f33;
+  --town: #8a978f;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+    --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+    --town: #6f7d75; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+  --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+  --town: #6f7d75; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.35rem; font-weight: 600; }
+.eyebrow { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.08em; font-size: .8rem; color: var(--route); font-weight: 600; }
+header { display: flex; flex-direction: column; gap: 10px; }
+header p { margin: 0; max-width: 65ch; color: var(--muted); }
+
+/* Wegweiser-Schild */
+.sign { display: inline-flex; align-items: stretch; border: 2px solid var(--route); border-radius: 3px; background: var(--surface); font-family: var(--f-display); font-weight: 600; color: var(--route); overflow: hidden; width: fit-content; max-width: 100%; }
+.sign span { padding: 4px 12px; }
+.sign .km { border-left: 2px solid var(--route); font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.fact { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
+.fact b { font-family: var(--f-mono); font-weight: 500; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.fact small { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.map-box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .map-box { position: static; } }
+.map-box svg { width: 100%; height: auto; display: block; }
+.map-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font-size: .9rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 4px solid var(--route); vertical-align: middle; margin-right: 6px; }
+.legend i.dash { border-top-style: dashed; border-top-width: 3px; }
+.legend i.water { border-color: var(--water); }
+label.toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; color: var(--fg); }
+label.toggle input { accent-color: var(--route); width: 18px; height: 18px; }
+
+.stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.stop { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 8px; border-bottom: 1px solid var(--line); cursor: pointer; border-radius: 4px; }
+.stop:focus-visible { outline: 2px solid var(--route); outline-offset: 2px; }
+.stop:hover, .stop.active { background: var(--route-soft); }
+.stop .n { width: 26px; height: 26px; border-radius: 50%; background: var(--surface); border: 2px solid var(--route); color: var(--route); font-family: var(--f-mono); font-size: .8rem; display: grid; place-items: center; margin-top: 1px; }
+.stop.option .n { border-style: dashed; }
+.stop h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; line-height: 1.25; }
+.stop p { margin: 2px 0 0; color: var(--muted); font-size: .95rem; grid-column: 2 / 4; }
+.stop .km { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted); font-size: .9rem; white-space: nowrap; }
+.stop.option { display: none; }
+.show-opt .stop.option { display: grid; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.profile svg { width: 100%; height: auto; display: block; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.info ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; }
+.info li::marker { color: var(--route); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 4px; border: 2px solid var(--route); color: var(--route); text-decoration: none; font-family: var(--f-display); font-weight: 600; font-size: 1rem; background: var(--surface); }
+.btn.primary { background: var(--route); color: var(--surface); }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.nav-row { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; padding-block: 10px; border-top: 1px solid var(--line); }
+.nav-what { display: flex; flex-direction: column; min-width: 0; }
+.nav-what b { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; }
+.nav-what span { color: var(--muted); font-size: .9rem; }
+.dest { display: flex; flex-wrap: wrap; gap: 8px; }
+.dest label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid var(--line); border-radius: 4px; cursor: pointer; font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; background: var(--surface); }
+.dest input { accent-color: var(--route); width: 16px; height: 16px; margin: 0; }
+.dest label:has(input:checked) { border-color: var(--route); color: var(--route); }
+.dest label:has(input:focus-visible) { outline: 2px solid var(--fg); outline-offset: 2px; }
+.dest small { font-family: var(--f-mono); font-weight: 400; font-size: .85rem; color: var(--muted); }
+.note { font-size: .85rem; color: var(--muted); margin: 0; }
+
+svg text { font-family: var(--f-body); }
+.m-label { fill: var(--muted); font-size: 11px; }
+.m-water { fill: var(--water); font-style: italic; font-size: 13px; font-family: var(--f-display); letter-spacing: .1em; }
+.m-region { fill: var(--town); font-size: 12px; letter-spacing: .25em; text-transform: uppercase; font-family: var(--f-display); }
+.marker circle { fill: var(--surface); stroke: var(--route); stroke-width: 2.5; transition: r .15s; }
+.marker text { fill: var(--route); font-family: var(--f-mono); font-size: 10px; font-weight: 500; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.marker { cursor: pointer; }
+.marker.active circle { fill: var(--route); }
+.marker.active text { fill: var(--surface); }
+.marker.option { display: none; }
+.show-opt .marker.option { display: inline; }
+.opt-path { display: none; }
+.show-opt .opt-path { display: inline; }
+@media (prefers-reduced-motion: reduce) { .marker circle { transition: none; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Radtour · Darmstadt → Frankfurt</div>
+    <h1>Mit dem Rad nach Frankfurt</h1>
+    <p>Von Darmstadt nach Norden auf dem Radschnellweg FRM 1 bis Langen, dann durch Dreieich und Neu-Isenburg, quer durch den Frankfurter Stadtwald nach Sachsenhausen und über den Eisernen Steg an den Main. Fast alles abseits der Hauptstraßen, zurück mit S-Bahn oder Regionalzug.</p>
+    <div class="sign" aria-label="Wegweiser: Frankfurt, etwa 33 Kilometer"><span>Frankfurt am Main</span><span class="km">33,5 km</span></div>
+  </header>
+
+  <section class="facts" aria-label="Eckdaten">
+    <div class="fact"><small>Strecke</small><b>≈ 33,5 km</b></div>
+    <div class="fact"><small>Fahrzeit bei 16 km/h</small><b>≈ 2:05 h</b></div>
+    <div class="fact"><small>Höhenmeter</small><b>↑ 40 · ↓ 85</b></div>
+    <div class="fact"><small>Auf dem Radschnellweg</small><b>≈ 14 km</b></div>
+  </section>
+
+  <section class="card nav" aria-labelledby="navH">
+    <h2 id="navH">Auf echter Karte öffnen</h2>
+    <div id="navRows"></div>
+    <p class="note">Die Links öffnen die Route im Fahrradmodus. BRouter rechnet auf OpenStreetMap mit allen Wegpunkten und kann die Strecke als GPX exportieren, etwa für Komoot oder ein Radnavi. Google Maps nimmt auf dem Handy nur wenige Zwischenstopps, deshalb gibt es die Tour zusätzlich in zwei Teilen. Apple Karten und openstreetmap.org planen nur von Start zu Ziel; die Wegführung kann dort abweichen.</p>
+  </section>
+
+  <section class="main">
+    <div class="map-box">
+      <svg id="map" role="img" aria-label="Schematische Karte der Route von Darmstadt über Langen und Neu-Isenburg nach Frankfurt"></svg>
+      <div class="map-tools">
+        <div class="legend"><span><i></i>Route</span><span><i class="dash"></i>Radschnellweg FRM 1</span><span><i class="water"></i>Main</span></div>
+      </div>
+      <p class="note">Schematische Karte, Lage der Orte vereinfacht. Für die genaue Wegführung die Route oben in BRouter oder Google Maps öffnen.</p>
+    </div>
+    <div class="card" style="padding: 8px 8px 4px;">
+      <h2 style="padding: 8px 8px 0;">Etappen</h2>
+      <ol class="stops" id="stops"></ol>
+    </div>
+  </section>
+
+  <section class="card profile">
+    <h2>Höhenprofil</h2>
+    <svg id="profile" role="img" aria-label="Höhenprofil: von etwa 145 Metern in Darmstadt leicht wellig auf etwa 100 Meter in Frankfurt"></svg>
+    <p class="note">Ungefähre Höhen über NN. Leicht wellig bis Neu-Isenburg, danach sanft bergab zum Main.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="card info" style="grid-column: 1 / -1;">
+      <h2>Ist die Strecke radtauglich?</h2>
+      <ul>
+        <li><b>Darmstadt-Nord → Langen:</b> Radschnellweg FRM 1, rund 10,5 km durchgehend fertig, breit und asphaltiert, entlang der Bahnlinie.</li>
+        <li><b>Langen → Neu-Isenburg:</b> der FRM 1 ist hier noch nicht durchgehend ausgebaut. Ihr fahrt auf vorhandenen Radwegen und ruhigen Straßen parallel zur Bahn.</li>
+        <li><b>Frankfurter Stadtwald:</b> breite Waldwege, meist befestigt, teils feiner Schotter. Mit jedem Rad gut fahrbar, nach Regen etwas schmutzig.</li>
+        <li><b>Sachsenhausen und Mainufer:</b> Stadtverkehr, am Mainufer und auf dem Eisernen Steg viele Fußgänger. Auf dem Steg wird das Rad geschoben.</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h2>Unterwegs</h2>
+      <ul>
+        <li><b>Langen:</b> Altstadt mit Vierröhrenbrunnen, gut für eine Pause.</li>
+        <li><b>Neu-Isenburg:</b> Hugenottenstadt mit kleinem Altstadtkern.</li>
+        <li><b>Stadtwald:</b> ruhige Waldstrecke, am Wochenende viel los an den Waldspielparks.</li>
+        <li><b>Museumsufer und Römer:</b> direkt am Ziel, Blick auf die Skyline vom Eisernen Steg.</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h2>Praktisches</h2>
+      <ul>
+        <li><b>Rückfahrt:</b> ab Frankfurt Hbf fahren S-Bahnen und Regionalzüge häufig nach Darmstadt Hbf, je nach Zug etwa 15 bis 35 Minuten. Fahrradmitnahme im RMV ist in der Regel kostenlos, aber vom Platz abhängig; in der Rushhour wird es eng.</li>
+        <li><b>Abkürzen:</b> die Strecke läuft fast immer nah an der S-Bahn. Wixhausen, Erzhausen, Egelsbach, Langen, Buchschlag und Neu-Isenburg haben Bahnhöfe.</li>
+        <li><b>Untergrund:</b> überwiegend Asphalt, im Stadtwald befestigte Waldwege. Trekking-, City- und Rennrad mit breiteren Reifen gehen gut.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const STOPS = [
+    { name: "Darmstadt Hbf", lat: 49.8725, lon: 8.6295, km: 0, ele: 145, desc: "Start am Hauptbahnhof, durch die Stadt nach Nordosten zum Bahnhof Darmstadt-Nord." },
+    { name: "Darmstadt-Nord", lat: 49.8857, lon: 8.6545, km: 2.7, ele: 145, desc: "Beginn des Radschnellwegs FRM 1. Ab hier breit, asphaltiert und ausgeschildert." },
+    { name: "Wixhausen", lat: 49.9300, lon: 8.6475, km: 8.4, ele: 132, desc: "Am Rand von Arheilgen vorbei, immer entlang der Bahn." },
+    { name: "Erzhausen", lat: 49.9520, lon: 8.6460, km: 11.2, ele: 128, desc: "Weiter auf dem Radschnellweg zwischen Feldern und Wald." },
+    { name: "Egelsbach", lat: 49.9670, lon: 8.6590, km: 13.4, ele: 130, desc: "Kleiner Flugplatz in Sichtweite." },
+    { name: "Langen", lat: 49.9935, lon: 8.6600, km: 16.8, ele: 140, desc: "Ende des fertigen FRM-1-Abschnitts am Bahnhof. Abstecher in die Altstadt möglich." },
+    { name: "Dreieich-Buchschlag", lat: 50.0230, lon: 8.6630, km: 20.5, ele: 135, desc: "Auf Radwegen parallel zur Bahn, ruhige Villenviertel." },
+    { name: "Neu-Isenburg", lat: 50.0530, lon: 8.6650, km: 24.4, ele: 125, desc: "Am Bahnhof vorbei, danach in den Frankfurter Stadtwald." },
+    { name: "Stadtwald / Louisa", lat: 50.0830, lon: 8.6700, km: 28.2, ele: 112, desc: "Breite Waldwege, kaum Autos. Leicht bergab Richtung Main." },
+    { name: "Sachsenhausen", lat: 50.0990, lon: 8.6860, km: 30.7, ele: 103, desc: "Am Südbahnhof vorbei durch Alt-Sachsenhausen zum Museumsufer." },
+    { name: "Eiserner Steg", lat: 50.1080, lon: 8.6830, km: 31.8, ele: 98, desc: "Über den Main zum Römerberg, Rad schieben. Skyline im Blick." },
+    { name: "Frankfurt Hbf", lat: 50.1070, lon: 8.6630, km: 33.5, ele: 100, desc: "Ziel. Am Mainufer entlang zum Hauptbahnhof, Bahn zurück nach Darmstadt." },
+  ];
+  const ROUTE = [[49.8725,8.6295],[49.8780,8.6400],[49.8857,8.6545],[49.9050,8.6520],[49.9300,8.6475],[49.9520,8.6460],
+    [49.9670,8.6590],[49.9935,8.6600],[50.0230,8.6630],[50.0530,8.6650],[50.0700,8.6680],[50.0830,8.6700],
+    [50.0990,8.6860],[50.1050,8.6850],[50.1080,8.6830],[50.1075,8.6720],[50.1070,8.6630]];
+  const FRM1 = [[49.8857,8.6545],[49.9050,8.6520],[49.9300,8.6475],[49.9520,8.6460],[49.9670,8.6590],[49.9935,8.6600]];
+  const MAIN = [[50.085,8.520],[50.096,8.543],[50.093,8.605],[50.098,8.645],[50.101,8.662],[50.107,8.683],[50.104,8.720],[50.103,8.760],[50.112,8.800]];
+  const TOWNS = [["Arheilgen",49.912,8.655,"start"],["Weiterstadt",49.904,8.588,"end"],["Messel",49.938,8.743,"start"],
+    ["Mörfelden",49.978,8.567,"end"],["Dreieich",50.010,8.695,"start"],["Offenbach",50.100,8.766,"start"],
+    ["Flughafen",50.040,8.570,"end"],["Kranichstein",49.893,8.690,"start"]];
+
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+  const fmt = (n) => n.toFixed(1).replace(".", ",");
+  const byName = (n) => STOPS.find((s) => s.name === n);
+  const ll = (s) => s.lat + "," + s.lon;
+  const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
+  const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
+  const osm = (a, b) => "https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=" + encodeURIComponent(ll(a) + ";" + ll(b));
+  const brouter = (pts) => "https://brouter.de/brouter-web/#map=11/49.99/8.66/standard&lonlats=" + pts.map((s) => s.lon + "," + s.lat).join(";") + "&profile=trekking";
+
+  // Karte: einfache Plattkarte, Breitengrade gestreckt
+  const map = document.getElementById("map");
+  const lon0 = 8.540, lon1 = 8.800, lat0 = 49.860, lat1 = 50.125;
+  const W = 520, kx = W / (lon1 - lon0), ky = kx / Math.cos(50 * Math.PI / 180) * 0.92, H = Math.round((lat1 - lat0) * ky);
+  const px = (p) => [((p[1] - lon0) * kx).toFixed(1), ((lat1 - p[0]) * ky).toFixed(1)];
+  const path = (pts) => "M" + pts.map((p) => px(p).join(",")).join(" L");
+  map.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  el("rect", { x: 0, y: 0, width: W, height: H, rx: 4, fill: "var(--land)" }, map);
+  const lbl = (p, t, cls, extra) => { const [x, y] = px(p); el("text", Object.assign({ x, y, class: cls }, extra || {}), map).textContent = t; };
+  lbl([50.068, 8.690], "Stadtwald", "m-region");
+  lbl([49.915, 8.555], "Darmstadt-Dieburg", "m-region");
+  el("path", { d: path(MAIN), fill: "none", stroke: "var(--water)", "stroke-width": 6, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+  lbl([50.090, 8.560], "MAIN", "m-water");
+  TOWNS.forEach(([n, la, lo, anchor]) => {
+    const [x, y] = px([la, lo]);
+    el("circle", { cx: x, cy: y, r: 2.5, fill: "var(--town)" }, map);
+    el("text", { x: +x + (anchor === "end" ? -6 : 6), y: +y + 4, class: "m-label", "text-anchor": anchor }, map).textContent = n;
+  });
+  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--surface)", "stroke-width": 8, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.8 }, map);
+  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--route)", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+  el("path", { d: path(FRM1), fill: "none", stroke: "var(--surface)", "stroke-width": 2, "stroke-dasharray": "5 5", "stroke-linecap": "round" }, map);
+  const kmPx = kx / (111.32 * Math.cos(49.99 * Math.PI / 180));
+  const sx = W - 24 - 5 * kmPx, sy = H - 24;
+  el("path", { d: `M${sx},${sy} h${5 * kmPx}`, stroke: "var(--fg)", "stroke-width": 2 }, map);
+  el("path", { d: `M${sx},${sy - 4} v8 M${sx + 5 * kmPx},${sy - 4} v8`, stroke: "var(--fg)", "stroke-width": 1.5 }, map);
+  el("text", { x: sx + 2.5 * kmPx, y: sy - 8, class: "m-label", "text-anchor": "middle" }, map).textContent = "5 km";
+  el("path", { d: `M${W - 24},${H - 86} l-7,16 l7,-4 l7,4 z`, fill: "var(--fg)" }, map);
+  el("text", { x: W - 24, y: H - 56, class: "m-label", "text-anchor": "middle" }, map).textContent = "N";
+
+  // Marker + Liste
+  const list = document.getElementById("stops");
+  const markers = [];
+  STOPS.forEach((s, i) => {
+    const label = String(i + 1);
+    const [x, y] = px([s.lat, s.lon]);
+    const g = el("g", { class: "marker" }, map);
+    el("circle", { cx: x, cy: y, r: 10 }, g);
+    el("text", { x, y }, g).textContent = label;
+    el("title", {}, g).textContent = s.name;
+    if (i === 0) el("text", { x: +x - 14, y: +y + 4, "text-anchor": "end", fill: "var(--fg)", "font-weight": 600, "font-size": 12 }, map).textContent = s.name;
+    if (i === STOPS.length - 1) el("text", { x: +x - 14, y: +y - 10, "text-anchor": "end", fill: "var(--fg)", "font-weight": 600, "font-size": 12 }, map).textContent = s.name;
+    const li = document.createElement("li");
+    li.className = "stop";
+    li.tabIndex = 0;
+    li.innerHTML = `<span class="n">${label}</span><h3></h3><span class="km">${fmt(s.km)} km</span><p></p>`;
+    li.querySelector("h3").textContent = s.name;
+    li.querySelector("p").textContent = s.desc;
+    list.appendChild(li);
+    markers.push({ g, li });
+    const activate = () => markers.forEach((m) => { const on = m.g === g; m.g.classList.toggle("active", on); m.li.classList.toggle("active", on); });
+    li.addEventListener("click", activate);
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+    g.addEventListener("click", () => { activate(); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); });
+  });
+
+  // Höhenprofil
+  const prof = document.getElementById("profile");
+  const PW = 720, PH = 180, L = 40, R = 12, T = 12, B = 30, maxKm = 35, eMin = 80, eMax = 150;
+  prof.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+  const xk = (k) => L + (k / maxKm) * (PW - L - R), ye = (e) => T + (1 - (e - eMin) / (eMax - eMin)) * (PH - T - B);
+  [80, 100, 120, 140].forEach((e) => {
+    el("line", { x1: L, x2: PW - R, y1: ye(e), y2: ye(e), stroke: "var(--line)", "stroke-width": 1 }, prof);
+    el("text", { x: L - 6, y: ye(e) + 4, class: "m-label", "text-anchor": "end" }, prof).textContent = e + " m";
+  });
+  for (let k = 0; k <= 35; k += 5) el("text", { x: xk(k), y: PH - 10, class: "m-label", "text-anchor": "middle" }, prof).textContent = k + " km";
+  const pts = STOPS.map((s) => [xk(s.km), ye(s.ele)]);
+  const line = "M" + pts.map((p) => p.join(",")).join(" L");
+  el("rect", { x: xk(2.7), y: T, width: xk(16.8) - xk(2.7), height: ye(eMin) - T, fill: "var(--route-soft)", opacity: 0.5 }, prof);
+  el("text", { x: xk(2.7) + 6, y: T + 12, class: "m-label" }, prof).textContent = "Radschnellweg FRM 1";
+  el("path", { d: line + ` L${xk(33.5)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
+  el("path", { d: line, fill: "none", stroke: "var(--route)", "stroke-width": 2.5, "stroke-linejoin": "round" }, prof);
+  pts.forEach((p, i) => el("circle", { cx: p[0], cy: p[1], r: i === 0 || i === pts.length - 1 ? 4 : 2.5, fill: "var(--route)" }, prof));
+
+  // Navi-Links
+  const rows = document.getElementById("navRows");
+  const btn = (text, href, primary) => `<a class="btn${primary ? " primary" : ""}" href="${href}" target="_blank" rel="noopener">${text}</a>`;
+  const row = (title, sub, links) => {
+    const d = document.createElement("div");
+    d.className = "nav-row";
+    d.innerHTML = `<div class="nav-what"><b></b><span></span></div><div class="links">${links}</div>`;
+    d.querySelector("b").textContent = title;
+    d.querySelector("span").textContent = sub;
+    rows.appendChild(d);
+  };
+  const full = ["Darmstadt Hbf", "Darmstadt-Nord", "Wixhausen", "Egelsbach", "Langen", "Dreieich-Buchschlag", "Neu-Isenburg", "Stadtwald / Louisa", "Sachsenhausen", "Eiserner Steg", "Frankfurt Hbf"].map(byName);
+  row("Ganze Tour", "alle Wegpunkte, Darmstadt bis Frankfurt", btn("OpenStreetMap (BRouter)", brouter(STOPS), true) + btn("Google Maps", google(full)));
+  [["Teil 1 · Darmstadt → Langen", "≈ 17 km, fast alles Radschnellweg", ["Darmstadt Hbf", "Darmstadt-Nord", "Wixhausen", "Egelsbach", "Langen"]],
+   ["Teil 2 · Langen → Frankfurt Hbf", "≈ 17 km durch Dreieich und den Stadtwald", ["Langen", "Neu-Isenburg", "Stadtwald / Louisa", "Eiserner Steg", "Frankfurt Hbf"]]]
+    .forEach(([title, sub, names]) => {
+      const p = names.map(byName), a = p[0], b = p[p.length - 1];
+      row(title, sub, btn("Google Maps", google(p)) + btn("Apple Karten", apple(a, b)) + btn("OpenStreetMap", osm(a, b)));
+    });
+})();
+</script>
