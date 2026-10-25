@@ -1,0 +1,333 @@
+<title>Rheintour ab Darmstadt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopf mit Eckdaten, darunter Karte + Etappenliste nebeneinander (mobil gestapelt), dann Höhenprofil und Praktisches. */
+:root {
+  --bg: #f3f5f1;          /* Ried-Wiesen, leicht grünstichig */
+  --surface: #ffffff;
+  --fg: #1d2622;
+  --muted: #5c6a63;
+  --line: #d5ddd7;
+  --land: #e7ece4;
+  --water: #5f9fc0;
+  --water-soft: #b9d6e5;
+  --route: #c8202f;       /* Rot wie auf den Radwegweisern */
+  --route-soft: #c8202f33;
+  --town: #8a978f;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+    --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+    --town: #6f7d75; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+  --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+  --town: #6f7d75; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.35rem; font-weight: 600; }
+.eyebrow { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.08em; font-size: .8rem; color: var(--route); font-weight: 600; }
+header { display: flex; flex-direction: column; gap: 10px; }
+header p { margin: 0; max-width: 65ch; color: var(--muted); }
+
+/* Wegweiser-Schild */
+.sign { display: inline-flex; align-items: stretch; border: 2px solid var(--route); border-radius: 3px; background: var(--surface); font-family: var(--f-display); font-weight: 600; color: var(--route); overflow: hidden; width: fit-content; max-width: 100%; }
+.sign span { padding: 4px 12px; }
+.sign .km { border-left: 2px solid var(--route); font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.fact { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
+.fact b { font-family: var(--f-mono); font-weight: 500; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.fact small { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.map-box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .map-box { position: static; } }
+.map-box svg { width: 100%; height: auto; display: block; }
+.map-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font-size: .9rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 4px solid var(--route); vertical-align: middle; margin-right: 6px; }
+.legend i.dash { border-top-style: dashed; border-top-width: 3px; }
+.legend i.water { border-color: var(--water); }
+label.toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; color: var(--fg); }
+label.toggle input { accent-color: var(--route); width: 18px; height: 18px; }
+
+.stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.stop { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 8px; border-bottom: 1px solid var(--line); cursor: pointer; border-radius: 4px; }
+.stop:focus-visible { outline: 2px solid var(--route); outline-offset: 2px; }
+.stop:hover, .stop.active { background: var(--route-soft); }
+.stop .n { width: 26px; height: 26px; border-radius: 50%; background: var(--surface); border: 2px solid var(--route); color: var(--route); font-family: var(--f-mono); font-size: .8rem; display: grid; place-items: center; margin-top: 1px; }
+.stop.option .n { border-style: dashed; }
+.stop h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; line-height: 1.25; }
+.stop p { margin: 2px 0 0; color: var(--muted); font-size: .95rem; grid-column: 2 / 4; }
+.stop .km { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted); font-size: .9rem; white-space: nowrap; }
+.stop.option { display: none; }
+.show-opt .stop.option { display: grid; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.profile svg { width: 100%; height: auto; display: block; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.info ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; }
+.info li::marker { color: var(--route); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 4px; border: 2px solid var(--route); color: var(--route); text-decoration: none; font-family: var(--f-display); font-weight: 600; font-size: 1rem; background: var(--surface); }
+.btn.primary { background: var(--route); color: var(--surface); }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.note { font-size: .85rem; color: var(--muted); margin: 0; }
+
+svg text { font-family: var(--f-body); }
+.m-label { fill: var(--muted); font-size: 11px; }
+.m-water { fill: var(--water); font-style: italic; font-size: 13px; font-family: var(--f-display); letter-spacing: .1em; }
+.m-region { fill: var(--town); font-size: 12px; letter-spacing: .25em; text-transform: uppercase; font-family: var(--f-display); }
+.marker circle { fill: var(--surface); stroke: var(--route); stroke-width: 2.5; transition: r .15s; }
+.marker text { fill: var(--route); font-family: var(--f-mono); font-size: 10px; font-weight: 500; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.marker { cursor: pointer; }
+.marker.active circle { fill: var(--route); }
+.marker.active text { fill: var(--surface); }
+.marker.option { display: none; }
+.show-opt .marker.option { display: inline; }
+.opt-path { display: none; }
+.show-opt .opt-path { display: inline; }
+@media (prefers-reduced-motion: reduce) { .marker circle { transition: none; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Radtour · Hessisches Ried · Rhein</div>
+    <h1>Von Darmstadt an den Rhein</h1>
+    <p>Durchs flache Ried nach Westen bis an den Rhein bei Kornsand, dann auf dem Damm und an den Ufern flussabwärts bis zur Mainmündung und über die Theodor-Heuss-Brücke nach Mainz. Zurück geht es mit der Regionalbahn.</p>
+    <div class="sign" aria-label="Wegweiser: Mainz, etwa 50 Kilometer"><span>Mainz über Kornsand</span><span class="km" id="signKm">50,5 km</span></div>
+  </header>
+
+  <section class="facts" aria-label="Eckdaten">
+    <div class="fact"><small>Strecke</small><b id="fDist">≈ 50,5 km</b></div>
+    <div class="fact"><small>Fahrzeit bei 16 km/h</small><b id="fTime">≈ 3:10 h</b></div>
+    <div class="fact"><small>Höhenmeter</small><b>↑ 15 · ↓ 70</b></div>
+    <div class="fact"><small>Davon am Wasser</small><b>≈ 24 km</b></div>
+  </section>
+
+  <section class="main">
+    <div class="map-box">
+      <svg id="map" role="img" aria-label="Schematische Karte der Route von Darmstadt über Kornsand am Rhein entlang nach Mainz"></svg>
+      <div class="map-tools">
+        <div class="legend"><span><i></i>Route</span><span class="opt-legend"><i class="dash"></i>Option Kühkopf</span><span><i class="water"></i>Rhein, Main, Altrhein</span></div>
+        <label class="toggle" for="optToggle"><input type="checkbox" id="optToggle"> Abstecher Kühkopf (+9 km)</label>
+      </div>
+      <p class="note">Schematische Karte, Lage der Orte und Flüsse vereinfacht. Für die genaue Wegführung die Route unten in BRouter oder Google Maps öffnen.</p>
+    </div>
+
+    <div class="card" style="padding: 8px 8px 4px;">
+      <h2 style="padding: 8px 8px 0;">Etappen</h2>
+      <ol class="stops" id="stops"></ol>
+    </div>
+  </section>
+
+  <section class="card profile">
+    <h2>Höhenprofil</h2>
+    <svg id="profile" role="img" aria-label="Höhenprofil: von etwa 145 Metern in Darmstadt auf etwa 87 Meter im Ried, danach flach"></svg>
+    <p class="note">Ungefähre Höhen über NN. Die einzige nennenswerte Neigung ist das sanfte Gefälle aus Darmstadt heraus; auf dem Rückweg nimmt die Bahn sie euch ab.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="card info">
+      <h2>Unterwegs</h2>
+      <ul>
+        <li><b>Fähre Kornsand–Nierstein:</b> kleiner Umweg hinüber nach Rheinhessen, zu den Weinbergen am Roten Hang. Fahrzeiten vorher prüfen, sie sind saisonabhängig.</li>
+        <li><b>Kühkopf-Knoblochsaue:</b> größtes Naturschutzgebiet Hessens, Auwald und Altrhein, Infozentrum im Hofgut Guntershausen. Schöner Abstecher ab Erfelden.</li>
+        <li><b>Goddelau:</b> Geburtshaus von Georg Büchner, liegt direkt an der Strecke.</li>
+        <li><b>Ginsheim und Mainspitze:</b> Ufer mit Blick auf Mainz und den Dom, gute Stelle für die letzte Pause.</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h2>Praktisches</h2>
+      <ul>
+        <li><b>Rückfahrt:</b> ab Mainz Hbf fährt die Regionalbahn direkt nach Darmstadt Hbf, etwa 35 bis 40 Minuten. Fahrradmitnahme im RMV ist in der Regel kostenlos, aber vom Platz abhängig.</li>
+        <li><b>Untergrund:</b> überwiegend asphaltierte Wirtschaftswege und Dammwege, einzelne Abschnitte am Rhein wassergebunden. Mit Trekking- oder Citybike gut machbar.</li>
+        <li><b>Wind:</b> im offenen Ried oft Westwind, also Gegenwind auf dem ersten Drittel.</li>
+        <li><b>Hochwasser:</b> bei hohem Pegel können Uferwege und der Kühkopf gesperrt sein.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Route zum Navigieren öffnen</h2>
+    <div class="links">
+      <a class="btn primary" id="lnkBrouter" href="#" target="_blank" rel="noopener">In BRouter-Web öffnen</a>
+      <a class="btn" id="lnkGoogle" href="#" target="_blank" rel="noopener">In Google Maps öffnen</a>
+    </div>
+    <p class="note">Beide Links übernehmen die Wegpunkte dieser Tour. In BRouter lässt sich die Strecke als GPX exportieren, zum Beispiel für Komoot oder ein Radnavi. Die Kilometerangaben hier sind Schätzungen und können von der berechneten Route um ein paar Kilometer abweichen.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  // Etappen: [Name, lat, lon, km ab Start, Höhe m, Beschreibung, optional]
+  const STOPS = [
+    ["Darmstadt Hbf", 49.8725, 8.6295, 0, 145, "Start am Westausgang, raus Richtung Griesheim. Leicht bergab."],
+    ["Griesheim", 49.8635, 8.5615, 6.0, 102, "Durch den Ort, danach Feldwege durchs offene Ried."],
+    ["Wolfskehlen", 49.8555, 8.4985, 11.5, 90, "Riedstadt beginnt. Gemüse- und Spargelfelder, kaum Verkehr."],
+    ["Goddelau", 49.8360, 8.4880, 14.2, 88, "Büchnerhaus am Weg. Bäcker für den ersten Stopp."],
+    ["Erfelden am Altrhein", 49.8345, 8.4615, 16.5, 87, "Erstes Wasser: der Erfelder Altrhein. Hier zweigt der Abstecher zum Kühkopf ab."],
+    ["Hofgut Guntershausen", 49.8220, 8.4120, null, 87, "Infozentrum im Naturschutzgebiet Kühkopf. Hin und zurück nach Erfelden, etwa 9 km.", true],
+    ["Leeheim", 49.8530, 8.4270, 20.4, 87, "Kurz durch den Ort, dann hoch auf den Rheindamm."],
+    ["Kornsand", 49.8770, 8.3640, 26.7, 86, "Am Rhein. Fähre nach Nierstein, Blick auf die Weinberge. Gute Mittagspause."],
+    ["Astheim", 49.9230, 8.3580, 32.9, 87, "Auf Damm und Uferweg flussabwärts, links Auwiesen, rechts der Strom."],
+    ["Ginsheim", 49.9660, 8.3180, 39.6, 86, "Uferpromenade am Altrhein, Biergärten und Eis."],
+    ["Mainspitze", 49.9925, 8.3000, 43.4, 85, "Hier mündet der Main in den Rhein. Blick hinüber auf Mainz."],
+    ["Staustufe Kostheim", 50.0005, 8.3190, 45.4, 86, "Über die Staustufe auf die andere Mainseite."],
+    ["Theodor-Heuss-Brücke", 50.0040, 8.2780, 48.7, 88, "Von Kastel über den Rhein in die Mainzer Altstadt."],
+    ["Mainz Hbf", 50.0010, 8.2590, 50.7, 90, "Ziel. Regionalbahn zurück nach Darmstadt."],
+  ];
+  // Linienführung (lat, lon) inkl. Dammpunkt zwischen Leeheim und Kornsand
+  const ROUTE = [
+    [49.8725,8.6295],[49.8690,8.6000],[49.8635,8.5615],[49.8600,8.5300],[49.8555,8.4985],[49.8360,8.4880],
+    [49.8345,8.4615],[49.8440,8.4440],[49.8530,8.4270],[49.8650,8.3900],[49.8770,8.3640],[49.9000,8.3600],
+    [49.9230,8.3580],[49.9450,8.3420],[49.9660,8.3180],[49.9800,8.3090],[49.9925,8.3000],[49.9960,8.3120],
+    [50.0005,8.3190],[50.0060,8.2950],[50.0060,8.2840],[50.0040,8.2780],[50.0010,8.2590]
+  ];
+  const OPT = [[49.8345,8.4615],[49.8300,8.4400],[49.8220,8.4120]];
+  const RHINE = [[49.765,8.470],[49.785,8.430],[49.800,8.385],[49.830,8.366],[49.856,8.362],[49.877,8.356],
+    [49.900,8.352],[49.925,8.345],[49.950,8.325],[49.970,8.305],[49.985,8.293],[49.995,8.287],[50.004,8.275],[50.020,8.258],[50.035,8.245]];
+  const ALTRHEIN = [[49.790,8.410],[49.800,8.448],[49.815,8.466],[49.834,8.466],[49.848,8.445],[49.858,8.405],[49.862,8.372]];
+  const MAIN = [[49.995,8.290],[49.997,8.310],[50.001,8.330],[50.000,8.360],[49.995,8.395],[49.998,8.430],[50.008,8.470]];
+  const TOWNS = [["Nierstein",49.870,8.338,"end"],["Oppenheim",49.855,8.357,"end"],["Nackenheim",49.915,8.338,"end"],
+    ["Stockstadt",49.810,8.473,"start"],["Trebur",49.926,8.407,"start"],["Groß-Gerau",49.921,8.482,"start"],
+    ["Rüsselsheim",49.990,8.413,"start"],["Pfungstadt",49.805,8.603,"start"],["Weiterstadt",49.904,8.588,"start"]];
+
+  // Projektion: einfache Plattkarte mit Breitenkorrektur
+  const W = 640, H = 480, lon0 = 8.200, lon1 = 8.700, lat0 = 49.775, lat1 = 50.040;
+  const kx = W / (lon1 - lon0), ky = H / (lat1 - lat0);
+  const px = (p) => [((p[1] - lon0) * kx).toFixed(1), ((lat1 - p[0]) * ky).toFixed(1)];
+  const path = (pts) => "M" + pts.map((p) => px(p).join(",")).join(" L");
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+
+  const map = document.getElementById("map");
+  map.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  el("rect", { x: 0, y: 0, width: W, height: H, rx: 4, fill: "var(--land)" }, map);
+  el("text", { x: 24, y: 420, class: "m-region" }, map).textContent = "Rheinhessen";
+  el("text", { x: 470, y: 330, class: "m-region" }, map).textContent = "Hess. Ried";
+  // Kühkopf-Fläche
+  el("path", { d: path(ALTRHEIN.concat([[49.830,8.366],[49.800,8.385]])) + "Z", fill: "var(--water-soft)", opacity: 0.35 }, map);
+  el("text", { x: px([49.828,8.418])[0], y: px([49.828,8.418])[1], class: "m-label", "text-anchor": "middle", "font-style": "italic" }, map).textContent = "Kühkopf";
+  el("path", { d: path(MAIN), fill: "none", stroke: "var(--water)", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+  el("path", { d: path(ALTRHEIN), fill: "none", stroke: "var(--water)", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+  el("path", { d: path(RHINE), fill: "none", stroke: "var(--water)", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+  const rl = px([49.900,8.372]); el("text", { x: rl[0], y: rl[1], class: "m-water", transform: `rotate(-80 ${rl[0]} ${rl[1]})`, "text-anchor": "middle" }, map).textContent = "RHEIN";
+  const ml = px([50.006,8.375]); el("text", { x: ml[0], y: ml[1], class: "m-water", "text-anchor": "middle" }, map).textContent = "MAIN";
+
+  TOWNS.forEach(([n, la, lo, anchor]) => {
+    const [x, y] = px([la, lo]);
+    el("circle", { cx: x, cy: y, r: 2.5, fill: "var(--town)" }, map);
+    el("text", { x: +x + (anchor === "end" ? -6 : 6), y: +y + 4, class: "m-label", "text-anchor": anchor }, map).textContent = n;
+  });
+
+  el("path", { d: path(OPT), class: "opt-path", fill: "none", stroke: "var(--route)", "stroke-width": 3.5, "stroke-dasharray": "6 5", "stroke-linecap": "round" }, map);
+  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--surface)", "stroke-width": 8, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.8 }, map);
+  el("path", { d: path(ROUTE), fill: "none", stroke: "var(--route)", "stroke-width": 4, "stroke-linecap": "round", "stroke-linejoin": "round" }, map);
+
+  // Maßstab 5 km und Nordpfeil
+  const kmPx = kx / (111.32 * Math.cos(49.9 * Math.PI / 180));
+  const sx = W - 30 - 5 * kmPx, sy = H - 24;
+  el("path", { d: `M${sx},${sy} h${5 * kmPx}`, stroke: "var(--fg)", "stroke-width": 2 }, map);
+  el("path", { d: `M${sx},${sy - 4} v8 M${sx + 5 * kmPx},${sy - 4} v8`, stroke: "var(--fg)", "stroke-width": 1.5 }, map);
+  el("text", { x: sx + 2.5 * kmPx, y: sy - 8, class: "m-label", "text-anchor": "middle" }, map).textContent = "5 km";
+  el("path", { d: `M${W - 30},26 l-7,16 l7,-4 l7,4 z`, fill: "var(--fg)" }, map);
+  el("text", { x: W - 30, y: 56, class: "m-label", "text-anchor": "middle" }, map).textContent = "N";
+
+  // Marker + Liste
+  const list = document.getElementById("stops");
+  const markers = [];
+  let num = 0;
+  STOPS.forEach((s, i) => {
+    const [name, la, lo, km, , desc, opt] = s;
+    const label = opt ? "K" : String(++num);
+    const [x, y] = px([la, lo]);
+    const g = el("g", { class: "marker" + (opt ? " option" : ""), tabindex: -1 }, map);
+    el("circle", { cx: x, cy: y, r: 10 }, g);
+    el("text", { x, y }, g).textContent = label;
+    const t = el("title", {}, g); t.textContent = name;
+    if (i === 0 || i === STOPS.length - 1 || name === "Kornsand") {
+      const below = name !== "Kornsand";
+      el("text", { x: below ? x : +x - 14, y: below ? +y + 26 : +y + 4, "text-anchor": below ? "middle" : "end", fill: "var(--fg)", "font-weight": 600, "font-size": 12 }, map).textContent = name;
+    }
+    const li = document.createElement("li");
+    li.className = "stop" + (opt ? " option" : "");
+    li.tabIndex = 0;
+    li.innerHTML = `<span class="n">${label}</span><h3></h3><span class="km">${km == null ? "+9 km" : km.toFixed(1).replace(".", ",") + " km"}</span><p></p>`;
+    li.querySelector("h3").textContent = name;
+    li.querySelector("p").textContent = desc;
+    list.appendChild(li);
+    markers.push({ g, li });
+    const activate = () => markers.forEach((m) => { const on = m.g === g; m.g.classList.toggle("active", on); m.li.classList.toggle("active", on); });
+    li.addEventListener("click", activate);
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } });
+    g.addEventListener("click", () => { activate(); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); });
+  });
+
+  // Höhenprofil
+  const prof = document.getElementById("profile");
+  const PW = 720, PH = 180, L = 40, R = 12, T = 12, B = 30, maxKm = 51, eMin = 80, eMax = 150;
+  prof.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+  const xk = (k) => L + (k / maxKm) * (PW - L - R), ye = (e) => T + (1 - (e - eMin) / (eMax - eMin)) * (PH - T - B);
+  [80, 100, 120, 140].forEach((e) => {
+    el("line", { x1: L, x2: PW - R, y1: ye(e), y2: ye(e), stroke: "var(--line)", "stroke-width": 1 }, prof);
+    el("text", { x: L - 6, y: ye(e) + 4, class: "m-label", "text-anchor": "end" }, prof).textContent = e + " m";
+  });
+  [0, 10, 20, 30, 40, 50].forEach((k) => {
+    el("text", { x: xk(k), y: PH - 10, class: "m-label", "text-anchor": "middle" }, prof).textContent = k + " km";
+  });
+  const pts = STOPS.filter((s) => !s[6]).map((s) => [xk(s[3]), ye(s[4])]);
+  const line = "M" + pts.map((p) => p.join(",")).join(" L");
+  el("path", { d: line + ` L${xk(50.7)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
+  el("path", { d: line, fill: "none", stroke: "var(--route)", "stroke-width": 2.5, "stroke-linejoin": "round" }, prof);
+  const water = xk(26.7);
+  el("line", { x1: water, x2: water, y1: T, y2: ye(eMin), stroke: "var(--water)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }, prof);
+  el("text", { x: water + 6, y: T + 12, class: "m-label", fill: "var(--water)" }, prof).textContent = "ab hier am Rhein";
+  pts.forEach((p, i) => el("circle", { cx: p[0], cy: p[1], r: i === 0 || i === pts.length - 1 ? 4 : 2.5, fill: "var(--route)" }, prof));
+
+  // Option umschalten
+  const app = document.getElementById("app");
+  const tgl = document.getElementById("optToggle");
+  const fmt = (n) => n.toFixed(1).replace(".", ",");
+  const update = () => {
+    const on = tgl.checked;
+    app.classList.toggle("show-opt", on);
+    const d = 50.7 + (on ? 9 : 0);
+    const mins = Math.round((d / 16) * 60);
+    document.getElementById("fDist").textContent = "≈ " + fmt(d) + " km";
+    document.getElementById("signKm").textContent = fmt(d) + " km";
+    document.getElementById("fTime").textContent = "≈ " + Math.floor(mins / 60) + ":" + String(mins % 60).padStart(2, "0") + " h";
+    const wps = STOPS.filter((s) => on || !s[6]);
+    const seq = on ? (() => { const a = wps.slice(); const i = a.findIndex((s) => s[6]); a.splice(i + 1, 0, a[i - 1]); return a; })() : wps;
+    document.getElementById("lnkBrouter").href = "https://brouter.de/brouter-web/#map=11/49.93/8.44/standard&lonlats=" + seq.map((s) => s[2] + "," + s[1]).join(";") + "&profile=trekking";
+    const g = seq.map((s) => s[1] + "," + s[2]);
+    const mid = g.slice(1, -1).filter((_, i, a) => a.length <= 9 || i % Math.ceil(a.length / 9) === 0).slice(0, 9);
+    document.getElementById("lnkGoogle").href = "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + g[0] + "&destination=" + g[g.length - 1] + "&waypoints=" + encodeURIComponent(mid.join("|"));
+  };
+  tgl.addEventListener("change", update);
+  update();
+})();
+</script>
