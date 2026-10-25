@@ -52,11 +52,11 @@ header p { margin: 0; max-width: 65ch; color: var(--muted); }
 .sign span { padding: 4px 12px; }
 .sign .km { border-left: 2px solid var(--route); font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
 
-.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .fact { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
 .fact b { font-family: var(--f-mono); font-weight: 500; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
 .fact small { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fact.kcal { grid-column: 1 / -1; } }
 
 .main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 @media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
@@ -138,6 +138,7 @@ svg text { font-family: var(--f-body); }
   <section class="facts" aria-label="Eckdaten">
     <div class="fact"><small>Strecke</small><b id="fDist">≈ 49,7 km</b></div>
     <div class="fact"><small>Fahrzeit bei 16 km/h</small><b id="fTime">≈ 3:10 h</b></div>
+    <div class="fact kcal"><small>Kalorien bei 85 kg</small><b id="fKcal">≈ 1.800 kcal</b></div>
     <div class="fact"><small>Höhenmeter</small><b id="fHm">↑ 15 · ↓ 70</b></div>
     <div class="fact"><small>Davon am Wasser</small><b id="fWater">≈ 21 km</b></div>
   </section>
@@ -198,6 +199,7 @@ svg text { font-family: var(--f-body); }
       <h2>Praktisches</h2>
       <ul>
         <li id="ret"></li>
+        <li><b>Kalorien:</b> grobe Schätzung für 85 kg bei gemütlichen 16 km/h (MET 6,8 × 85 kg × Fahrzeit). Gegenwind, Gepäck und höheres Tempo erhöhen den Verbrauch deutlich, mit E-Bike ist es etwa die Hälfte.</li>
         <li><b>Untergrund:</b> überwiegend asphaltierte Wirtschaftswege und Dammwege, einzelne Abschnitte am Rhein wassergebunden. Mit Trekking- oder Citybike gut machbar.</li>
         <li><b>Wind:</b> im offenen Ried oft Westwind, also Gegenwind auf dem ersten Drittel.</li>
         <li><b>Hochwasser:</b> bei hohem Pegel können Uferwege und der Kühkopf gesperrt sein.</li>
@@ -418,6 +420,9 @@ svg text { font-family: var(--f-body); }
     document.getElementById("signTo").textContent = D.label;
     document.getElementById("signKm").textContent = fmt(d) + " km";
     document.getElementById("fDist").textContent = "≈ " + fmt(d) + " km";
+    // Kalorien: MET 6,8 (Radfahren ca. 16 km/h) × 85 kg × Stunden, auf 50 gerundet
+    const kcal = Math.round((6.8 * 85 * (d / 16)) / 50) * 50;
+    document.getElementById("fKcal").textContent = "≈ " + kcal.toLocaleString("de-DE") + " kcal";
     document.getElementById("fTime").textContent = "≈ " + Math.floor(mins / 60) + ":" + String(mins % 60).padStart(2, "0") + " h";
     document.getElementById("fHm").textContent = D.hm;
     document.getElementById("fWater").textContent = "≈ " + D.water + " km";
