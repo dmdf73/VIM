@@ -122,11 +122,11 @@ svg text { font-family: var(--f-body); }
     <div class="eyebrow">Radtour · Hessisches Ried · Rhein</div>
     <h1>Von Darmstadt an den Rhein</h1>
     <p>Durchs flache Ried nach Westen bis an den Rhein bei Kornsand, dann auf dem Damm und an den Ufern flussabwärts bis zur Mainmündung und über die Theodor-Heuss-Brücke nach Mainz. Zurück geht es mit der Regionalbahn.</p>
-    <div class="sign" aria-label="Wegweiser: Mainz, etwa 50 Kilometer"><span>Mainz über Kornsand</span><span class="km" id="signKm">50,5 km</span></div>
+    <div class="sign" aria-label="Wegweiser: Mainz, etwa 50 Kilometer"><span>Mainz über Kornsand</span><span class="km" id="signKm">49,7 km</span></div>
   </header>
 
   <section class="facts" aria-label="Eckdaten">
-    <div class="fact"><small>Strecke</small><b id="fDist">≈ 50,5 km</b></div>
+    <div class="fact"><small>Strecke</small><b id="fDist">≈ 49,7 km</b></div>
     <div class="fact"><small>Fahrzeit bei 16 km/h</small><b id="fTime">≈ 3:10 h</b></div>
     <div class="fact"><small>Höhenmeter</small><b>↑ 15 · ↓ 70</b></div>
     <div class="fact"><small>Davon am Wasser</small><b>≈ 24 km</b></div>
@@ -183,10 +183,22 @@ svg text { font-family: var(--f-body); }
   </section>
 
   <section class="grid2">
+    <div class="card info" style="grid-column: 1 / -1;">
+      <h2>Ist die Strecke radtauglich?</h2>
+      <ul>
+        <li><b>Darmstadt → Griesheim:</b> eigener Radweg, überwiegend befestigt.</li>
+        <li><b>Ried bis Leeheim:</b> asphaltierte Feldwege, stellenweise Betonplatten, kaum Autos. Teile sind als Kreisradroute ausgeschildert.</li>
+        <li><b>Leeheim → Kornsand:</b> ausgeschilderte Radverbindung (GG 31) abseits der Landstraße bis zum Rheinradweg.</li>
+        <li><b>Kornsand → Ginsheim:</b> Damm- und Deichwege des Hessischen Radfernwegs R6 am Rhein.</li>
+        <li><b>Mainquerung:</b> über die Mainbrücke Gustavsburg–Kostheim mit Radweg. Die Schleuse liegt fast 2 km flussaufwärts und ist nicht der Weg.</li>
+        <li><b>Theodor-Heuss-Brücke:</b> für Radfahrer freigegeben, viel Betrieb an schönen Tagen.</li>
+        <li><b>Kühkopf:</b> Naturschutzgebiet, Beschilderung vor Ort beachten, nicht jeder Weg ist für Räder freigegeben.</li>
+      </ul>
+    </div>
     <div class="card info">
       <h2>Unterwegs</h2>
       <ul>
-        <li><b>Fähre Kornsand–Nierstein:</b> kleiner Umweg hinüber nach Rheinhessen, zu den Weinbergen am Roten Hang. Fahrzeiten vorher prüfen, sie sind saisonabhängig.</li>
+        <li><b>Fähre Kornsand–Nierstein:</b> nimmt Fahrräder mit, fährt etwa alle 30 Minuten. Bei sehr niedrigem Rheinpegel war sie schon eingestellt, also vorher auf rheinfaehre-nierstein.de prüfen.</li>
         <li><b>Kühkopf-Knoblochsaue:</b> größtes Naturschutzgebiet Hessens, Auwald und Altrhein, Infozentrum im Hofgut Guntershausen. Schöner Abstecher ab Erfelden.</li>
         <li><b>Goddelau:</b> Geburtshaus von Georg Büchner, liegt direkt an der Strecke.</li>
         <li><b>Ginsheim und Mainspitze:</b> Ufer mit Blick auf Mainz und den Dom, gute Stelle für die letzte Pause.</li>
@@ -220,16 +232,16 @@ svg text { font-family: var(--f-body); }
     ["Astheim", 49.9230, 8.3580, 32.9, 87, "Auf Damm und Uferweg flussabwärts, links Auwiesen, rechts der Strom."],
     ["Ginsheim", 49.9660, 8.3180, 39.6, 86, "Uferpromenade am Altrhein, Biergärten und Eis."],
     ["Mainspitze", 49.9925, 8.3000, 43.4, 85, "Hier mündet der Main in den Rhein. Blick hinüber auf Mainz."],
-    ["Staustufe Kostheim", 50.0005, 8.3190, 45.4, 86, "Über die Staustufe auf die andere Mainseite."],
-    ["Theodor-Heuss-Brücke", 50.0040, 8.2780, 48.7, 88, "Von Kastel über den Rhein in die Mainzer Altstadt."],
-    ["Mainz Hbf", 50.0010, 8.2590, 50.7, 90, "Ziel. Regionalbahn zurück nach Darmstadt."],
+    ["Mainbrücke Kostheim", 49.9985, 8.3110, 44.6, 86, "Über die Mainbrücke (B 43) nach Kostheim, hier kreuzen sich die Radfernwege R3 und R6. Auf der Gustavsburger Seite führt der Radweg unter der Brücke durch, die Auffahrt ist etwas unübersichtlich."],
+    ["Theodor-Heuss-Brücke", 50.0040, 8.2780, 47.7, 88, "Von Kastel über den Rhein in die Mainzer Altstadt."],
+    ["Mainz Hbf", 50.0010, 8.2590, 49.7, 90, "Ziel. Regionalbahn zurück nach Darmstadt."],
   ];
   // Linienführung (lat, lon) inkl. Dammpunkt zwischen Leeheim und Kornsand
   const ROUTE = [
     [49.8725,8.6295],[49.8690,8.6000],[49.8635,8.5615],[49.8600,8.5300],[49.8555,8.4985],[49.8360,8.4880],
     [49.8345,8.4615],[49.8440,8.4440],[49.8530,8.4270],[49.8650,8.3900],[49.8770,8.3640],[49.9000,8.3600],
-    [49.9230,8.3580],[49.9450,8.3420],[49.9660,8.3180],[49.9800,8.3090],[49.9925,8.3000],[49.9960,8.3120],
-    [50.0005,8.3190],[50.0060,8.2950],[50.0060,8.2840],[50.0040,8.2780],[50.0010,8.2590]
+    [49.9230,8.3580],[49.9450,8.3420],[49.9660,8.3180],[49.9800,8.3090],[49.9925,8.3000],[49.9960,8.3090],
+    [49.9985,8.3110],[50.0040,8.3000],[50.0060,8.2840],[50.0040,8.2780],[50.0010,8.2590]
   ];
   const OPT = [[49.8345,8.4615],[49.8300,8.4400],[49.8220,8.4120]];
   const RHINE = [[49.765,8.470],[49.785,8.430],[49.800,8.385],[49.830,8.366],[49.856,8.362],[49.877,8.356],
@@ -325,7 +337,7 @@ svg text { font-family: var(--f-body); }
   });
   const pts = STOPS.filter((s) => !s[6]).map((s) => [xk(s[3]), ye(s[4])]);
   const line = "M" + pts.map((p) => p.join(",")).join(" L");
-  el("path", { d: line + ` L${xk(50.7)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
+  el("path", { d: line + ` L${xk(49.7)},${ye(eMin)} L${xk(0)},${ye(eMin)} Z`, fill: "var(--route-soft)" }, prof);
   el("path", { d: line, fill: "none", stroke: "var(--route)", "stroke-width": 2.5, "stroke-linejoin": "round" }, prof);
   const water = xk(26.7);
   el("line", { x1: water, x2: water, y1: T, y2: ye(eMin), stroke: "var(--water)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }, prof);
@@ -339,7 +351,7 @@ svg text { font-family: var(--f-body); }
   const update = () => {
     const on = tgl.checked;
     app.classList.toggle("show-opt", on);
-    const d = 50.7 + (on ? 9 : 0);
+    const d = 49.7 + (on ? 9 : 0);
     const mins = Math.round((d / 16) * 60);
     document.getElementById("fDist").textContent = "≈ " + fmt(d) + " km";
     document.getElementById("signKm").textContent = fmt(d) + " km";
@@ -352,10 +364,10 @@ svg text { font-family: var(--f-body); }
     const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
     const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
     const osm = (a, b) => "https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=" + encodeURIComponent(ll(a) + ";" + ll(b));
-    const full = seq.filter((s, i) => i === 0 || i === seq.length - 1 || ["Goddelau", "Leeheim", "Kornsand", "Astheim", "Ginsheim", "Staustufe Kostheim", "Theodor-Heuss-Brücke", "Hofgut Guntershausen"].includes(s[0]));
+    const full = seq.filter((s, i) => i === 0 || i === seq.length - 1 || ["Goddelau", "Leeheim", "Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim", "Theodor-Heuss-Brücke", "Hofgut Guntershausen"].includes(s[0]));
     document.getElementById("lnkGoogle").href = google(full);
     const leg1 = ["Darmstadt Hbf", "Griesheim", on ? "Hofgut Guntershausen" : "Goddelau", "Leeheim", "Kornsand"].map(byName);
-    const leg2 = ["Kornsand", "Astheim", "Ginsheim", "Staustufe Kostheim", "Mainz Hbf"].map(byName);
+    const leg2 = ["Kornsand", "Astheim", "Ginsheim", "Mainbrücke Kostheim", "Mainz Hbf"].map(byName);
     document.getElementById("l1Google").href = google(leg1);
     document.getElementById("l2Google").href = google(leg2);
     document.getElementById("l1Apple").href = apple(leg1[0], leg1[4]);
