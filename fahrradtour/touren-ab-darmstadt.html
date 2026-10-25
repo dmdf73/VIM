@@ -1,0 +1,317 @@
+<title>Fünf Touren ab Darmstadt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopf, Übersichtskarte + Vergleichstabelle nebeneinander (mobil gestapelt), darunter je Route eine Karte mit Etappen und Navi-Links. */
+:root {
+  --bg: #f3f5f1;          /* Ried-Wiesen, leicht grünstichig */
+  --surface: #ffffff;
+  --fg: #1d2622;
+  --muted: #5c6a63;
+  --line: #d5ddd7;
+  --land: #e7ece4;
+  --water: #5f9fc0;
+  --water-soft: #b9d6e5;
+  --route: #c8202f;       /* Rot wie auf den Radwegweisern */
+  --route-soft: #c8202f33;
+  --town: #8a978f;
+  --r1: #c8202f; --r2: #8a4fbf; --r3: #2f7d3b; --r4: #b26a00; --r5: #1f6fb2;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+    --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+    --town: #6f7d75; --r1: #ff5a63; --r2: #b98cf0; --r3: #5cc46b; --r4: #f0a640; --r5: #5aa8f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131915; --surface: #1b231e; --fg: #e4ebe6; --muted: #9aa9a1; --line: #2e3a33;
+  --land: #1f2923; --water: #4f8fb3; --water-soft: #2a4a5c; --route: #ff5a63; --route-soft: #ff5a6333;
+  --town: #6f7d75; --r1: #ff5a63; --r2: #b98cf0; --r3: #5cc46b; --r4: #f0a640; --r5: #5aa8f0; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.35rem; font-weight: 600; }
+.eyebrow { font-family: var(--f-display); text-transform: uppercase; letter-spacing: 0.08em; font-size: .8rem; color: var(--route); font-weight: 600; }
+header { display: flex; flex-direction: column; gap: 10px; }
+header p { margin: 0; max-width: 65ch; color: var(--muted); }
+
+/* Wegweiser-Schild */
+.sign { display: inline-flex; align-items: stretch; border: 2px solid var(--route); border-radius: 3px; background: var(--surface); font-family: var(--f-display); font-weight: 600; color: var(--route); overflow: hidden; width: fit-content; max-width: 100%; }
+.sign span { padding: 4px 12px; }
+.sign .km { border-left: 2px solid var(--route); font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.fact { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
+.fact b { font-family: var(--f-mono); font-weight: 500; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.fact small { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 760px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fact.kcal { grid-column: 1 / -1; } }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.map-box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .map-box { position: static; } }
+.map-box svg { width: 100%; height: auto; display: block; }
+.map-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; font-size: .9rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 4px solid var(--route); vertical-align: middle; margin-right: 6px; }
+.legend i.dash { border-top-style: dashed; border-top-width: 3px; }
+.legend i.water { border-color: var(--water); }
+label.toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; color: var(--fg); }
+label.toggle input { accent-color: var(--route); width: 18px; height: 18px; }
+
+.stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.stop { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 8px; border-bottom: 1px solid var(--line); cursor: pointer; border-radius: 4px; }
+.stop:focus-visible { outline: 2px solid var(--route); outline-offset: 2px; }
+.stop:hover, .stop.active { background: var(--route-soft); }
+.stop .n { width: 26px; height: 26px; border-radius: 50%; background: var(--surface); border: 2px solid var(--route); color: var(--route); font-family: var(--f-mono); font-size: .8rem; display: grid; place-items: center; margin-top: 1px; }
+.stop.option .n { border-style: dashed; }
+.stop h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; line-height: 1.25; }
+.stop p { margin: 2px 0 0; color: var(--muted); font-size: .95rem; grid-column: 2 / 4; }
+.stop .km { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted); font-size: .9rem; white-space: nowrap; }
+.stop.option { display: none; }
+.show-opt .stop.option { display: grid; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.profile svg { width: 100%; height: auto; display: block; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.info ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; }
+.info li::marker { color: var(--route); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 4px; border: 2px solid var(--route); color: var(--route); text-decoration: none; font-family: var(--f-display); font-weight: 600; font-size: 1rem; background: var(--surface); }
+.btn.primary { background: var(--route); color: var(--surface); }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.nav-row { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; padding-block: 10px; border-top: 1px solid var(--line); }
+.nav-what { display: flex; flex-direction: column; min-width: 0; }
+.nav-what b { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; }
+.nav-what span { color: var(--muted); font-size: .9rem; }
+.dest { display: flex; flex-wrap: wrap; gap: 8px; }
+.dest label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid var(--line); border-radius: 4px; cursor: pointer; font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; background: var(--surface); }
+.dest input { accent-color: var(--route); width: 16px; height: 16px; margin: 0; }
+.dest label:has(input:checked) { border-color: var(--route); color: var(--route); }
+.dest label:has(input:focus-visible) { outline: 2px solid var(--fg); outline-offset: 2px; }
+.dest small { font-family: var(--f-mono); font-weight: 400; font-size: .85rem; color: var(--muted); }
+.note { font-size: .85rem; color: var(--muted); margin: 0; }
+
+svg text { font-family: var(--f-body); }
+.m-label { fill: var(--muted); font-size: 11px; }
+.m-water { fill: var(--water); font-style: italic; font-size: 13px; font-family: var(--f-display); letter-spacing: .1em; }
+.m-region { fill: var(--town); font-size: 12px; letter-spacing: .25em; text-transform: uppercase; font-family: var(--f-display); }
+.marker circle { fill: var(--surface); stroke: var(--route); stroke-width: 2.5; transition: r .15s; }
+.marker text { fill: var(--route); font-family: var(--f-mono); font-size: 10px; font-weight: 500; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.marker { cursor: pointer; }
+.marker.active circle { fill: var(--route); }
+.marker.active text { fill: var(--surface); }
+.marker.option { display: none; }
+.show-opt .marker.option { display: inline; }
+.opt-path { display: none; }
+.show-opt .opt-path { display: inline; }
+@media (prefers-reduced-motion: reduce) { .marker circle { transition: none; } }
+
+table.cmp { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .95rem; }
+.tbl { overflow-x: auto; }
+table.cmp th, table.cmp td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { font-family: var(--f-display); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+table.cmp td.num { font-family: var(--f-mono); white-space: nowrap; }
+table.cmp tr.row { cursor: pointer; }
+table.cmp tr.row:hover, table.cmp tr.row.active { background: var(--route-soft); }
+table.cmp tr.row:focus-visible { outline: 2px solid var(--route); outline-offset: -2px; }
+.dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: var(--surface); font-family: var(--f-mono); font-size: .75rem; margin-right: 8px; vertical-align: middle; }
+.rname { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; }
+.tag { display: inline-block; font-size: .75rem; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-top: 2px; }
+.routes { display: flex; flex-direction: column; gap: 20px; }
+.rcard { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.rcard h2 { display: flex; align-items: center; gap: 4px; }
+.rcard .lead { margin: 0; max-width: 70ch; }
+.rfacts { display: flex; flex-wrap: wrap; gap: 6px 20px; font-family: var(--f-mono); font-size: .9rem; color: var(--muted); }
+.rfacts b { color: var(--fg); font-weight: 500; }
+.rgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 28px; }
+@media (max-width: 760px) { .rgrid { grid-template-columns: minmax(0, 1fr); } }
+.rgrid h3 { margin: 0 0 6px; font-family: var(--f-display); font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.chain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.chain li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 4px 0 4px 16px; border-left: 2px solid var(--c); position: relative; }
+.chain li::before { content: ""; position: absolute; left: -6px; top: 11px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--c); }
+.chain .km { font-family: var(--f-mono); color: var(--muted); font-size: .85rem; }
+.rcard ul.pts { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 4px; }
+.rcard .btn { border-color: var(--c); color: var(--c); }
+.rcard .btn.primary { background: var(--c); color: var(--surface); }
+#ov .rt { transition: opacity .2s; }
+#ov.focus .rt { opacity: .18; }
+#ov.focus .rt.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { #ov .rt { transition: none; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Radtouren · Start Darmstadt</div>
+    <h1>Fünf Touren ab Darmstadt</h1>
+    <p>Fünf Tagestouren in alle Richtungen: an die Bergstraße, hoch zur Burg Frankenstein, zur Fossiliengrube Messel, durchs Ried zum Kloster Lorsch und eine kurze Runde durch Darmstadts Parks und Wälder. Zwei Touren enden an einem Bahnhof, drei sind Rundtouren.</p>
+  </header>
+
+  <section class="main">
+    <div class="map-box">
+      <svg id="ov" role="img" aria-label="Übersichtskarte mit fünf Radtouren rund um Darmstadt"></svg>
+      <p class="note">Schematische Karte. Tippe eine Tour in der Tabelle an, um sie hervorzuheben. Den genauen Weg zeigen die Navi-Links bei jeder Tour.</p>
+    </div>
+    <div class="card">
+      <h2>Vergleich</h2>
+      <div class="tbl"><table class="cmp" id="cmp">
+        <thead><tr><th>Tour</th><th>km</th><th>Hm ↑</th><th>Zeit</th><th>kcal · 85 kg</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <p class="note">Kalorien grob geschätzt: flache Touren mit 16 km/h und MET 6,8, hügelige mit 14 km/h und MET 8,0, jeweils × 85 kg × Fahrzeit. Wind, Gepäck und Tempo ändern das deutlich; mit E-Bike etwa die Hälfte. Kilometer und Höhenmeter sind Schätzungen.</p>
+    </div>
+  </section>
+
+  <section class="routes" id="routes"></section>
+
+  <section class="card info">
+    <h2>Gut zu wissen</h2>
+    <ul>
+      <li><b>Bahn zurück:</b> von Heppenheim und Lorsch fahren Züge nach Darmstadt, von Lorsch mit Umstieg in Bensheim. Die Bergstraße gehört zum Verkehrsverbund VRN, die Regeln zur Fahrradmitnahme können dort anders sein als im RMV. Vorher prüfen.</li>
+      <li><b>Weitere Touren:</b> die Rheintour nach Mainz und die Tour nach Frankfurt über den Radschnellweg gibt es als eigene Seiten.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(function () {
+  const ROUTES = [
+    { id: 1, c: "--r1", name: "Bergstraße bis Heppenheim", tag: "Streckentour · Bahn zurück", hilly: false, hm: 150,
+      lead: "Auf der ausgeschilderten Radroute „Die Bergstraße“ am Fuß des Odenwalds nach Süden. Von Ort zu Ort durch Obstwiesen und Weinberge, drei hübsche Marktplätze, im Frühjahr Mandel- und Obstblüte.",
+      pts: [["Darmstadt, Luisenplatz", 49.8726, 8.6506, 0], ["Eberstadt", 49.8170, 8.6430, 7.4], ["Seeheim", 49.7680, 8.6500, 13.0], ["Jugenheim", 49.7520, 8.6400, 15.5],
+            ["Zwingenberg", 49.7230, 8.6110, 21.0], ["Auerbach", 49.7000, 8.6230, 25.0], ["Bensheim", 49.6810, 8.6230, 28.0], ["Heppenheim, Marktplatz", 49.6420, 8.6390, 36.5], ["Heppenheim Bf", 49.6400, 8.6290, 37.5]],
+      high: ["Altstadt von Zwingenberg, älteste Stadt an der Bergstraße", "Blick hoch zum Melibokus und zum Auerbacher Schloss", "Marktplatz Heppenheim mit Fachwerk und Eiscafés", "Abkürzen: in Zwingenberg oder Bensheim in den Zug steigen"],
+      bike: ["Ausgeschilderte Radroute, meist verkehrsarme Wege und Wirtschaftswege", "Leicht wellig am Hangfuß, keine langen Anstiege", "In den Ortsdurchfahrten etwas Verkehr"] },
+    { id: 2, c: "--r2", name: "Burg Frankenstein", tag: "Rundtour · Bergtour", hilly: true, hm: 330,
+      lead: "Die sportliche Tour: von Eberstadt den Frankenstein hinauf zur Burg mit Blick über die Rheinebene, dann durchs Modautal hinunter nach Mühltal und zurück nach Darmstadt.",
+      pts: [["Darmstadt Hbf", 49.8725, 8.6295, 0], ["Bessungen", 49.8600, 8.6550, 2.8], ["Eberstadt", 49.8170, 8.6430, 8.6], ["Burg Frankenstein", 49.7935, 8.6680, 14.1],
+            ["Nieder-Beerbach", 49.7860, 8.6840, 16.5], ["Nieder-Ramstadt", 49.8280, 8.6870, 21.5], ["Böllenfalltor", 49.8580, 8.6720, 25.5], ["Darmstadt Hbf", 49.8725, 8.6295, 29.5]],
+      high: ["Burg Frankenstein mit Aussicht bis Mainz und in den Pfälzerwald", "Burgrestaurant mit Terrasse oben", "Rasante Abfahrt ins Modautal"],
+      bike: ["Anstieg zur Burg asphaltiert: rund 2,8 km mit durchschnittlich knapp 8 %, Spitzen um 12 %", "Wenig Autoverkehr, oben ein paar Schlaglöcher, bei der Abfahrt aufpassen", "Für Untrainierte mit E-Bike deutlich angenehmer"] },
+    { id: 3, c: "--r3", name: "Grube Messel & Kranichstein", tag: "Rundtour · Wald", hilly: false, hm: 120,
+      lead: "Durch den Herrngarten und den Kranichsteiner Wald zum Jagdschloss, weiter zur Grube Messel, dem UNESCO-Welterbe mit den berühmten Urpferdchen, und über Messel und Arheilgen zurück.",
+      pts: [["Darmstadt Hbf", 49.8725, 8.6295, 0], ["Herrngarten", 49.8770, 8.6550, 2.3], ["Jagdschloss Kranichstein", 49.9040, 8.6920, 7.1], ["Grube Messel", 49.9170, 8.7540, 12.7],
+            ["Messel", 49.9380, 8.7440, 15.6], ["Arheilgen", 49.9120, 8.6550, 24.0], ["Darmstadt Hbf", 49.8725, 8.6295, 29.7]],
+      high: ["Besucherzentrum Grube Messel mit Aussichtsplattform auf dem Dach", "Jagdschloss Kranichstein und Backhausteich", "Lange Abschnitte im schattigen Wald, gut für heiße Tage"],
+      bike: ["Überwiegend Waldwege und Radwege, teils fester Schotter", "Fast eben, ein paar sanfte Wellen im Wald", "Fahrrad wird für die Anreise zur Grube ausdrücklich empfohlen, Parkplätze sind knapp"] },
+    { id: 4, c: "--r4", name: "Durchs Ried zum Kloster Lorsch", tag: "Streckentour · Bahn zurück", hilly: false, hm: 20,
+      lead: "Flach nach Süden durch Pfungstadt und die Felder des Rieds zum Kloster Lorsch, dem zweiten UNESCO-Welterbe der Gegend mit der karolingischen Königshalle.",
+      pts: [["Darmstadt Hbf", 49.8725, 8.6295, 0], ["Pfungstadt", 49.8060, 8.6030, 9.2], ["Hähnlein", 49.7590, 8.5710, 16.0], ["Schwanheim", 49.6930, 8.5670, 24.8],
+            ["Kloster Lorsch", 49.6535, 8.5695, 30.1], ["Lorsch Bf", 49.6530, 8.5640, 30.6]],
+      high: ["Königshalle und Klosterareal Lorsch", "Brauerei-Stadt Pfungstadt", "Spargel- und Gemüsefelder im Frühsommer"],
+      bike: ["Völlig flach, meist asphaltierte Feldwege abseits der Hauptstraßen", "Teilweise auf der ausgeschilderten Familien-Radroute des Landkreises", "Offenes Gelände, bei Wind anstrengender als gedacht"] },
+    { id: 5, c: "--r5", name: "Darmstädter Parks & Ludwigshöhe", tag: "Rundtour · Feierabend", hilly: true, hm: 180,
+      lead: "Kurze Runde für den Feierabend: Herrngarten, Mathildenhöhe mit Hochzeitsturm, Rosenhöhe, durch den Wald zum Oberwaldhaus am Steinbrücker Teich, hoch zur Ludwigshöhe und über den Prinz-Emil-Garten zurück.",
+      pts: [["Darmstadt Hbf", 49.8725, 8.6295, 0], ["Herrngarten", 49.8770, 8.6550, 2.3], ["Mathildenhöhe", 49.8765, 8.6680, 3.4], ["Rosenhöhe", 49.8730, 8.6820, 4.7],
+            ["Oberwaldhaus", 49.8570, 8.7090, 7.8], ["Ludwigshöhe", 49.8360, 8.6720, 12.1], ["Prinz-Emil-Garten", 49.8560, 8.6500, 15.4], ["Darmstadt Hbf", 49.8725, 8.6295, 18.2]],
+      high: ["Mathildenhöhe, UNESCO-Welterbe mit Hochzeitsturm", "Biergarten am Oberwaldhaus", "Ludwigsturm mit Blick über die Stadt"],
+      bike: ["Im Wald breite, befestigte Forstwege", "Kurzer, kräftiger Anstieg zur Ludwigshöhe", "In der Innenstadt Radwege und Tempo-30-Straßen"] },
+  ];
+  const TOWNS = [["Griesheim",49.8635,8.5615,"end"],["Weiterstadt",49.904,8.588,"end"],["Dieburg",49.900,8.840,"end"],["Roßdorf",49.860,8.762,"start"],
+    ["Ober-Ramstadt",49.831,8.749,"start"],["Bickenbach",49.757,8.611,"end"],["Lindenfels",49.684,8.781,"end"],["Biblis",49.690,8.455,"start"]];
+
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+  const fmt = (n) => n.toFixed(1).replace(".", ",");
+  const ll = (p) => p[1] + "," + p[2];
+  const time = (r) => { const km = r.pts[r.pts.length - 1][3]; return km / (r.hilly ? 14 : 16); };
+  const kcal = (r) => Math.round(((r.hilly ? 8.0 : 6.8) * 85 * time(r)) / 50) * 50;
+  const hhmm = (h) => { const m = Math.round(h * 60); return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0") + " h"; };
+  const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
+  const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
+  const brouter = (pts) => "https://brouter.de/brouter-web/#map=12/" + pts[0][1] + "/" + pts[0][2] + "/standard&lonlats=" + pts.map((p) => p[2] + "," + p[1]).join(";") + "&profile=trekking";
+
+  // Übersichtskarte
+  const ov = document.getElementById("ov");
+  const lon0 = 8.520, lon1 = 8.800, lat0 = 49.620, lat1 = 49.955;
+  const W = 520, kx = W / (lon1 - lon0), ky = kx / Math.cos(50 * Math.PI / 180) * 0.92, H = Math.round((lat1 - lat0) * ky);
+  const px = (la, lo) => [((lo - lon0) * kx).toFixed(1), ((lat1 - la) * ky).toFixed(1)];
+  ov.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  el("rect", { x: 0, y: 0, width: W, height: H, rx: 4, fill: "var(--land)" }, ov);
+  const region = (la, lo, t) => { const [x, y] = px(la, lo); el("text", { x, y, class: "m-region" }, ov).textContent = t; };
+  region(49.740, 8.700, "Odenwald"); region(49.800, 8.530, "Ried");
+  TOWNS.forEach(([n, la, lo, a]) => { const [x, y] = px(la, lo); el("circle", { cx: x, cy: y, r: 2.5, fill: "var(--town)" }, ov); el("text", { x: +x + (a === "end" ? -6 : 6), y: +y + 4, class: "m-label", "text-anchor": a }, ov).textContent = n; });
+  const groups = {};
+  ROUTES.forEach((r) => {
+    const g = el("g", { class: "rt" }, ov);
+    groups[r.id] = g;
+    const d = "M" + r.pts.map((p) => px(p[1], p[2]).join(",")).join(" L");
+    el("path", { d, fill: "none", stroke: "var(--surface)", "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.8 }, g);
+    el("path", { d, fill: "none", stroke: `var(${r.c})`, "stroke-width": 3.5, "stroke-linecap": "round", "stroke-linejoin": "round" }, g);
+    const mid = r.pts[Math.floor(r.pts.length / 2)];
+    const [x, y] = px(mid[1], mid[2]);
+    el("circle", { cx: x, cy: y, r: 10, fill: `var(${r.c})`, stroke: "var(--surface)", "stroke-width": 2 }, g);
+    el("text", { x, y, fill: "var(--surface)", "font-family": "var(--f-mono)", "font-size": 11, "text-anchor": "middle", "dominant-baseline": "central" }, g).textContent = r.id;
+    const end = r.pts[r.pts.length - 1];
+    if (end[1] !== r.pts[0][1]) { const [ex, ey] = px(end[1], end[2]); el("text", { x: +ex + 8, y: +ey + 4, fill: "var(--fg)", "font-size": 11, "font-weight": 600 }, g).textContent = end[0].replace(" Bf", ""); }
+  });
+  const [dx, dy] = px(49.8725, 8.6295);
+  el("rect", { x: dx - 6, y: dy - 6, width: 12, height: 12, fill: "var(--fg)" }, ov);
+  el("text", { x: dx - 10, y: dy + 4, "text-anchor": "end", fill: "var(--fg)", "font-weight": 700, "font-size": 13 }, ov).textContent = "Darmstadt";
+  const kmPx = kx / (111.32 * Math.cos(49.8 * Math.PI / 180));
+  const sx = W - 24 - 5 * kmPx, sy = H - 20;
+  el("path", { d: `M${sx},${sy} h${5 * kmPx} M${sx},${sy - 4} v8 M${sx + 5 * kmPx},${sy - 4} v8`, stroke: "var(--fg)", "stroke-width": 1.5 }, ov);
+  el("text", { x: sx + 2.5 * kmPx, y: sy - 8, class: "m-label", "text-anchor": "middle" }, ov).textContent = "5 km";
+
+  // Tabelle + Routenkarten
+  const tbody = document.querySelector("#cmp tbody");
+  const routesEl = document.getElementById("routes");
+  const rows = {};
+  const focus = (id) => {
+    const same = ov.classList.contains("focus") && groups[id].classList.contains("on");
+    ov.classList.toggle("focus", !same);
+    Object.entries(groups).forEach(([k, g]) => g.classList.toggle("on", !same && +k === id));
+    Object.entries(rows).forEach(([k, tr]) => tr.classList.toggle("active", !same && +k === id));
+  };
+  ROUTES.forEach((r) => {
+    const km = r.pts[r.pts.length - 1][3];
+    const tr = document.createElement("tr");
+    tr.className = "row"; tr.tabIndex = 0;
+    tr.innerHTML = `<td><span class="dot" style="background:var(${r.c})">${r.id}</span><span class="rname"></span><br><span class="tag"></span></td><td class="num">${fmt(km)}</td><td class="num">${r.hm}</td><td class="num">${hhmm(time(r))}</td><td class="num">≈ ${kcal(r).toLocaleString("de-DE")}</td>`;
+    tr.querySelector(".rname").textContent = r.name;
+    tr.querySelector(".tag").textContent = r.tag;
+    tr.addEventListener("click", () => focus(r.id));
+    tr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); focus(r.id); } });
+    tbody.appendChild(tr); rows[r.id] = tr;
+
+    const card = document.createElement("article");
+    card.className = "rcard"; card.id = "tour" + r.id;
+    card.style.setProperty("--c", `var(${r.c})`);
+    const loop = r.pts[0][1] === r.pts[r.pts.length - 1][1];
+    const links = `<a class="btn primary" target="_blank" rel="noopener" href="${brouter(r.pts)}">OpenStreetMap (BRouter)</a>` +
+      `<a class="btn" target="_blank" rel="noopener" href="${google(r.pts)}">Google Maps</a>` +
+      (loop ? "" : `<a class="btn" target="_blank" rel="noopener" href="${apple(r.pts[0], r.pts[r.pts.length - 1])}">Apple Karten</a>`);
+    card.innerHTML = `<h2><span class="dot" style="background:var(${r.c})">${r.id}</span><span class="t"></span></h2>
+      <p class="lead"></p>
+      <div class="rfacts"><span><b>≈ ${fmt(km)} km</b></span><span>↑ <b>${r.hm} Hm</b></span><span><b>${hhmm(time(r))}</b> Fahrzeit</span><span><b>≈ ${kcal(r).toLocaleString("de-DE")} kcal</b> bei 85 kg</span></div>
+      <div class="rgrid">
+        <div><h3>Etappen</h3><ol class="chain"></ol></div>
+        <div style="display:flex;flex-direction:column;gap:14px"><div><h3>Unterwegs</h3><ul class="pts hi"></ul></div><div><h3>Radtauglich?</h3><ul class="pts bk"></ul></div></div>
+      </div>
+      <div class="links">${links}</div>` + (loop ? `<p class="note">Rundtour: Apple Karten kann keine Rundtouren mit Zwischenzielen planen, daher nur BRouter und Google Maps.</p>` : "");
+    card.querySelector(".t").textContent = r.name;
+    card.querySelector(".lead").textContent = r.lead;
+    const chain = card.querySelector(".chain");
+    r.pts.forEach((p) => { const li = document.createElement("li"); li.innerHTML = `<span></span><span class="km">${fmt(p[3])} km</span>`; li.firstChild.textContent = p[0]; chain.appendChild(li); });
+    const fill = (sel, arr) => arr.forEach((t) => { const li = document.createElement("li"); li.textContent = t; card.querySelector(sel).appendChild(li); });
+    fill(".hi", r.high); fill(".bk", r.bike);
+    routesEl.appendChild(card);
+  });
+})();
+</script>
