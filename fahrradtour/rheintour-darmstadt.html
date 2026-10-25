@@ -95,6 +95,10 @@ label.toggle input { accent-color: var(--route); width: 18px; height: 18px; }
 .btn.primary { background: var(--route); color: var(--surface); }
 .btn:hover { filter: brightness(1.08); }
 .btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.nav-row { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; padding-block: 10px; border-top: 1px solid var(--line); }
+.nav-what { display: flex; flex-direction: column; min-width: 0; }
+.nav-what b { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; }
+.nav-what span { color: var(--muted); font-size: .9rem; }
 .note { font-size: .85rem; color: var(--muted); margin: 0; }
 
 svg text { font-family: var(--f-body); }
@@ -126,6 +130,34 @@ svg text { font-family: var(--f-body); }
     <div class="fact"><small>Fahrzeit bei 16 km/h</small><b id="fTime">≈ 3:10 h</b></div>
     <div class="fact"><small>Höhenmeter</small><b>↑ 15 · ↓ 70</b></div>
     <div class="fact"><small>Davon am Wasser</small><b>≈ 24 km</b></div>
+  </section>
+
+  <section class="card nav" aria-labelledby="navH">
+    <h2 id="navH">Auf echter Karte öffnen</h2>
+    <div class="nav-row">
+      <div class="nav-what"><b>Ganze Tour</b><span>alle Wegpunkte, Darmstadt bis Mainz</span></div>
+      <div class="links">
+        <a class="btn primary" id="lnkBrouter" href="#" target="_blank" rel="noopener">OpenStreetMap (BRouter)</a>
+        <a class="btn" id="lnkGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div class="nav-what"><b>Teil 1 · Darmstadt → Kornsand</b><span id="leg1Km">≈ 27 km durchs Ried</span></div>
+      <div class="links">
+        <a class="btn" id="l1Google" href="#" target="_blank" rel="noopener">Google Maps</a>
+        <a class="btn" id="l1Apple" href="#" target="_blank" rel="noopener">Apple Karten</a>
+        <a class="btn" id="l1Osm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div class="nav-what"><b>Teil 2 · Kornsand → Mainz Hbf</b><span>≈ 24 km am Rhein</span></div>
+      <div class="links">
+        <a class="btn" id="l2Google" href="#" target="_blank" rel="noopener">Google Maps</a>
+        <a class="btn" id="l2Apple" href="#" target="_blank" rel="noopener">Apple Karten</a>
+        <a class="btn" id="l2Osm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
+      </div>
+    </div>
+    <p class="note">Die Links öffnen die Route im Fahrradmodus der jeweiligen Karte. BRouter rechnet auf OpenStreetMap mit allen Wegpunkten und kann die Strecke als GPX exportieren, etwa für Komoot oder ein Radnavi. Google Maps nimmt auf dem Handy nur wenige Zwischenstopps, deshalb gibt es die Tour zusätzlich in zwei Teilen. Apple Karten und openstreetmap.org planen nur von Start zu Ziel, ohne Zwischenpunkte; die Wegführung kann dort leicht abweichen.</p>
   </section>
 
   <section class="main">
@@ -171,14 +203,6 @@ svg text { font-family: var(--f-body); }
     </div>
   </section>
 
-  <section class="card">
-    <h2>Route zum Navigieren öffnen</h2>
-    <div class="links">
-      <a class="btn primary" id="lnkBrouter" href="#" target="_blank" rel="noopener">In BRouter-Web öffnen</a>
-      <a class="btn" id="lnkGoogle" href="#" target="_blank" rel="noopener">In Google Maps öffnen</a>
-    </div>
-    <p class="note">Beide Links übernehmen die Wegpunkte dieser Tour. In BRouter lässt sich die Strecke als GPX exportieren, zum Beispiel für Komoot oder ein Radnavi. Die Kilometerangaben hier sind Schätzungen und können von der berechneten Route um ein paar Kilometer abweichen.</p>
-  </section>
 </div>
 
 <script>
@@ -323,9 +347,22 @@ svg text { font-family: var(--f-body); }
     const wps = STOPS.filter((s) => on || !s[6]);
     const seq = on ? (() => { const a = wps.slice(); const i = a.findIndex((s) => s[6]); a.splice(i + 1, 0, a[i - 1]); return a; })() : wps;
     document.getElementById("lnkBrouter").href = "https://brouter.de/brouter-web/#map=11/49.93/8.44/standard&lonlats=" + seq.map((s) => s[2] + "," + s[1]).join(";") + "&profile=trekking";
-    const g = seq.map((s) => s[1] + "," + s[2]);
-    const mid = g.slice(1, -1).filter((_, i, a) => a.length <= 9 || i % Math.ceil(a.length / 9) === 0).slice(0, 9);
-    document.getElementById("lnkGoogle").href = "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + g[0] + "&destination=" + g[g.length - 1] + "&waypoints=" + encodeURIComponent(mid.join("|"));
+    const byName = (n) => STOPS.find((s) => s[0] === n);
+    const ll = (s) => s[1] + "," + s[2];
+    const google = (pts) => "https://www.google.com/maps/dir/?api=1&travelmode=bicycling&origin=" + ll(pts[0]) + "&destination=" + ll(pts[pts.length - 1]) + "&waypoints=" + encodeURIComponent(pts.slice(1, -1).map(ll).join("|"));
+    const apple = (a, b) => "https://maps.apple.com/directions?source=" + ll(a) + "&destination=" + ll(b) + "&mode=cycling";
+    const osm = (a, b) => "https://www.openstreetmap.org/directions?engine=graphhopper_bicycle&route=" + encodeURIComponent(ll(a) + ";" + ll(b));
+    const full = seq.filter((s, i) => i === 0 || i === seq.length - 1 || ["Goddelau", "Leeheim", "Kornsand", "Astheim", "Ginsheim", "Staustufe Kostheim", "Theodor-Heuss-Brücke", "Hofgut Guntershausen"].includes(s[0]));
+    document.getElementById("lnkGoogle").href = google(full);
+    const leg1 = ["Darmstadt Hbf", "Griesheim", on ? "Hofgut Guntershausen" : "Goddelau", "Leeheim", "Kornsand"].map(byName);
+    const leg2 = ["Kornsand", "Astheim", "Ginsheim", "Staustufe Kostheim", "Mainz Hbf"].map(byName);
+    document.getElementById("l1Google").href = google(leg1);
+    document.getElementById("l2Google").href = google(leg2);
+    document.getElementById("l1Apple").href = apple(leg1[0], leg1[4]);
+    document.getElementById("l2Apple").href = apple(leg2[0], leg2[4]);
+    document.getElementById("l1Osm").href = osm(leg1[0], leg1[4]);
+    document.getElementById("l2Osm").href = osm(leg2[0], leg2[4]);
+    document.getElementById("leg1Km").textContent = on ? "≈ 36 km durchs Ried, mit Kühkopf" : "≈ 27 km durchs Ried";
   };
   tgl.addEventListener("change", update);
   update();
